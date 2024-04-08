@@ -1,0 +1,70 @@
+/* Ensure the body or any global container doesn't add unexpected padding or margin */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Adjust if necessary */
+    min-height: 100%;
+    box-sizing: border-box;
+}
+
+*, *::before, *::after {
+    box-sizing: inherit; /* This ensures that box-sizing is consistent across all elements */
+}
+
+.top-bar {
+    width: 100%;
+    height: 90px;
+    background-color: #7a7a7a; /* Example background color, adjust as needed */
+    padding: 10px 20px;
+    color: white;
+    box-sizing: border-box; /* Include padding in the element's total width and height */
+}
+
+.custom-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin: 0; /* Ensure no default margin is affecting layout */
+    box-sizing: border-box;
+}
+
+.sidebar {
+    flex-basis: 195px;
+    background-color: #ebebeb; /* Light gray background for sidebar, adjust as needed */
+    padding: 0;
+    min-height: 100vh; /* Full height */
+    margin: 0; /* Ensure sidebar sticks to the left and does not add extra height */
+    overflow: hidden; /* Show scroll only when needed inside the sidebar */
+}
+
+.content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow: auto; /* Show scroll only when needed inside the content */
+}
+
+.rz-navigation-item {
+    background-color: #ebebeb;
+    color: #000000;
+    height: 60px;
+    align-content: center;
+    font-size: 18px;
+    border-color: brown !important;
+}
+
+.rz-navigation-item-link {
+    height: 60px;
+}
+
+.rz-panel-menu {
+    background-color: #ebebeb !important;
+    border-color: #ebebeb !important;
+}
+
+.rz-navigation-item-wrapper-active {
+    background-color: #fe8e01 !important;
+}
+
+:root {
+    --rz-panel-menu-item-border: #ebebeb !important;
+}

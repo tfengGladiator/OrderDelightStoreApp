@@ -1,0 +1,16 @@
+﻿@page "/"
+@inject StoreAppService StoreAppService
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+@code{
+
+    protected override async Task OnInitializedAsync()
+    {
+        StoreAppService.AddCurrentUserAndStoreHeaders("101-1", "757a7d94-473b-40ca-bc2f-b127333c1536");
+    }
+
+}

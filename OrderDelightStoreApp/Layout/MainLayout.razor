@@ -1,0 +1,60 @@
+﻿@inherits LayoutComponentBase
+
+<div class="top-bar">
+    <RadzenRow Class="custom-content-justify-full-width rz-py-3">
+        <!-- Left Column for Language Selector -->
+        <RadzenColumn Size="12" SizeMD="2" Class="d-flex justify-content-start">
+            <RadzenStack Orientation="Orientation.Horizontal">
+                <RadzenImage Path="/images/profile.jpg" Style="width:80px;height:80px;border-radius:50%;margin:-17px 0 0 0;"></RadzenImage>
+                <RadzenStack Orientation="Orientation.Vertical">
+                    <RadzenLabel Style="padding: 0; margin-bottom:-5px;">Tao</RadzenLabel> <RadzenLabel Style="padding: 0; margin-top:-5px;">Feng</RadzenLabel>
+                </RadzenStack>
+              </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6" Class="d-flex justify-content-start">
+            <div style="width: auto;" class="rz-pb-3">
+                <RadzenText Text="Store Management" Style="font-size: 28px; margin:18px 0 0 30px; color:white;"/>
+            </div>
+        </RadzenColumn>
+
+        <!-- Right Column for Button -->
+        <RadzenColumn Size="12" SizeMD="4" Class="d-flex justify-content-end">
+            <div style="width: auto;" class="rz-pb-3">
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    <RadzenText Text="Whitehorn Bistro 213-1" Style="font-size: 16px; margin:18px 0 0 15px; color:white;"/>
+                    <div style="width:195px;background-color:white; height:90px;margin-top:-22px;margin-right:-20px; border:1px dashed;">
+                        <RadzenImage Path="/images/OD-logo.png" Style="width:60px;height:60px;border-radius:30px;padding-bottom:5px;margin-right:-10px;"></RadzenImage>
+                    </div>
+                </RadzenStack>
+            </div>
+        </RadzenColumn>
+    </RadzenRow>
+</div>
+<div class="custom-container">
+    <div class="sidebar">
+        <NavMenu />
+    </div> 
+    <div class="content" style="overflow-x: auto;">
+        @Body
+    </div>  
+</div>
+
+<style>
+  .custom-container {
+    display: flex;
+    flex-direction: row; 
+    width: 100%;  
+  }
+
+  .content {
+    flex-grow: 1; 
+    /* Adjust padding or margin as needed */
+  }
+
+  .sidebar {
+    width: 190px;
+    flex-shrink: 0; 
+    /* Adjust padding or margin as needed */
+  }
+</style>

@@ -1,0 +1,22 @@
+﻿<div class="sidebar" @onclick="ToggleNavMenu">
+    <RadzenPanelMenu Style="width:300px" Multiple="false">
+        <RadzenPanelMenuItem Text="Waitlist" Icon="dashboard" Path="/waitlist" />
+        <RadzenPanelMenuItem Text="Tables" Icon="shopping_cart" Path="/tables" />
+        <RadzenPanelMenuItem Text="Menus" Icon="store" Path="/menus" />
+        <RadzenPanelMenuItem Text="Orders" Icon="people" Path="/orders" />
+        <RadzenPanelMenuItem Text="Customers" Icon="bar_chart" Path="/customers" />
+        <RadzenPanelMenuItem Text="Memberships" Icon="bar_chart" Path="/memberships" />
+        <RadzenPanelMenuItem Text="Admin" Icon="bar_chart" Path="/reports" />
+    </RadzenPanelMenu>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

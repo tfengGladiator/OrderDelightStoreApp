@@ -1,0 +1,279 @@
+﻿@page "/menus"
+@page "/menus/{MenuId}"
+@using DayHours = OrderDelightLibrary.Shared.Models.DayHours
+
+@inject DialogService DialogService
+@inject StoreAppService StoreAppService
+<div class="menu-container">
+    <ul style="list-style-type: none; padding: 0; display: flex; background-color: #f7f6f6; margin-bottom: 0px;">
+        @foreach (var menu in MenuList)
+        {
+            <li style="@($"cursor: pointer; padding: 10px 20px 15px 20px; border-bottom: {(menu.Name == selectedMenu ? "3px solid orange" : "none")}; text-align: center; margin:0 10px 0 10px;") "
+                @onclick="@(() => HandleClick(menu.Name))">
+                <div style="font-size: 20px; margin: 5px 0;">@menu.Name</div>
+                <div style="font-size: 14px; font-family: Helvetica, Arial, sans-serif;">
+                    @foreach (var dh in ResolveToday(menu))
+                    {
+                        <div class='display:block'>@dh</div>
+                    }
+                </div>
+            </li>
+        }
+    </ul>
+
+    <RadzenTabs SelectedIndex="selectedCategory" Class="rz-p-3" TabPosition="TabPosition.TopRight">
+        <Tabs>
+            <RadzenTabsItem Text="Category 1">
+                <RadzenCard>
+                    <ul class="food-list">
+                        @foreach (var foodItem in GetFoodItems(selectedMenu))
+                        {
+                            <li class="food-item">
+                                <a href="JavaScript:void(0)" @onclick="@(async() => await ViewFoodOptions(foodItem))">
+                                    <img src="@foodItem.ImageUrl" alt="@foodItem.Name" class="food-image">
+                                    <div class="food-info">
+                                        <span class="food-name">@foodItem.Name</span>
+                                        <span class="food-price">($@foodItem.Price)</span>
+                                    </div>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </RadzenCard>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Category 2">
+                <p>Lunch content</p>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Category 2">
+                <p>Dinner content</p>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+</div>
+<style>
+    .menu-container {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .category-list {
+        list-style-type: none;
+        padding: 0;
+        display: flex;
+        background-color: white;
+        border-top: 1px solid #f7f6f6;
+    }
+
+        .category-list li {
+            padding: 10px 20px;
+        }
+
+    .food-list-container {
+        margin-top: 20px; /* Add some space after the category list */
+    }
+
+    /* Previous styles ... */
+    .food-list {
+        list-style-type: none;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start; /* Align items to the start */
+        gap: 20px; /* Creates a gap between the flex items */
+    }
+
+    .food-item {
+        position: relative;
+        flex: 0 1 auto; /* Allows the box to not grow but shrink if needed, without setting a base size */
+        display: flex;
+        justify-content: center; /* Centers child elements horizontally */
+        align-items: flex-end; /* Align children to the bottom */
+        width: 190px; /* Set a fixed width for the food item */
+        margin: 10px; /* Adds space around each food item */
+    }
+
+    .food-image {
+        width: 190px; /* Fixed width as per requirement */
+        height: 190px; /* Fixed height as per requirement */
+        object-fit: cover; /* Adjusts the image to cover the area without stretching */
+    }
+
+    .food-info {
+        position: absolute;
+        bottom: 0; /* Align to the bottom of the food-item */
+        left: 0;
+        width: 100%; /* Ensure the info covers the width of the food-item */
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        color: white;
+        padding: 10px;
+        box-sizing: border-box; /* Ensures padding does not add to the width */
+        text-align: center; /* Center-align the text */
+    }
+
+    .food-name, .food-price {
+        display: block; /* Each item on its own line */
+    }
+
+</style>
+@code {
+
+    [Parameter] public string MenuId { get; set; } = "";
+    private int selectedCategory = 0; // Initially no selection
+    private string selectedMenu = ""; // Initially no selection
+    ImageSize largeFoodItemImageSize;
+    List<Menu> MenuList = new List<Menu>();
+    protected override async Task OnInitializedAsync()
+    {
+        await StoreAppService.LoadStoreAsync("101-1");
+  
+        var storeLocalTime = CommonUtilities.ConvertToLocalTime(DateTime.UtcNow, StoreAppService.CurrentStore.TimeZoneId);
+        var currentTime = storeLocalTime.TimeOfDay;
+        var currentDay = storeLocalTime.DayOfWeek;
+        MenuList = await StoreAppService.GetFilteredMenusAsync();
+        MenuList = MenuList
+            .Where(m => IsMenuActive(m, currentDay, currentTime)) 
+ //           .OrderBy(m => GetEarliestStartTime(m, currentDay)) 
+            .OrderBy(m => m.Name) 
+            .Distinct().ToList();
+    }
+
+    private bool IsMenuActive(Menu menu, DayOfWeek currentDay, TimeSpan currentTime)
+    {
+        Console.WriteLine($"Checking menu: {menu.Name}"); // Add a log here
+
+        if (menu.IsDeleted) 
+        {
+            Console.WriteLine($"\tMenu {menu.Name} is  deleted.");
+            return false; // Not active if deleted
+        } 
+
+        if (!menu.IsEnabled) 
+        {
+            Console.WriteLine($"\tMenu {menu.Name} is not enabled.");
+            return false; // Not active if not enabled
+        }
+        return true;
+
+        var matchingDayHour = menu.DayHours.FirstOrDefault(dh => dh.DayOfWeek == currentDay);
+        if (matchingDayHour != null)
+        {
+            Console.WriteLine($"\tDayHour found for {currentDay}.");
+            if (matchingDayHour.IsClosed)
+            {
+                Console.WriteLine($"\tDayHour is closed.");
+                return false; // Not active if closed
+            }
+
+            if (matchingDayHour.TimeRanges.Any(tr => IsTimeRangeValid(tr, currentTime)))
+            {
+                Console.WriteLine("\tTime range matches!");
+                return true; // Active at this point
+            }
+        }
+        return false; 
+    }
+
+    private bool IsDayHourValid(DayHours dayHour, DayOfWeek currentDay, TimeSpan currentTime)
+    {
+        return dayHour.DayOfWeek == currentDay && 
+               !dayHour.IsClosed && 
+               dayHour.TimeRanges.Any(tr => IsTimeRangeValid(tr, currentTime)); 
+    }
+
+    private bool IsTimeRangeValid(TimeRange timeRange, TimeSpan currentTime)
+    {
+        if (TimeSpan.TryParse(timeRange.StartTime, out var startTime) &&
+            TimeSpan.TryParse(timeRange.EndTime, out var endTime))
+        {
+            return currentTime >= startTime && currentTime <= endTime;
+        }
+        else
+        {
+            Console.WriteLine($"Error parsing time range for timeRange: Start: {timeRange.StartTime}, End: {timeRange.EndTime}");
+            return false;
+        }
+    }
+
+    private TimeSpan GetEarliestStartTime(Menu menu, DayOfWeek currentDay)
+    {
+        return menu.DayHours
+            .Where(dh => dh.DayOfWeek == currentDay)
+            .SelectMany(dh => dh.TimeRanges)
+            .Select(tr => {
+                              if (TimeSpan.TryParse(tr.StartTime, out var startTime)) {
+                                  return startTime;
+                              } else {
+                                  Console.WriteLine($"Error parsing start time for menu: {menu.Name}, Start: {tr.StartTime}"); 
+                                  return TimeSpan.MaxValue;
+                              }
+            })
+            .Min();
+    }
+
+    string[] ResolveToday(Menu menu)
+    {
+        if (StoreAppService.CurrentStore == null) return new[] { "-" };
+
+        Console.WriteLine("StoreAppService.CurrentStore.TimeZoneId: " + StoreAppService.CurrentStore.TimeZoneId);
+        var today = CommonUtilities.ConvertToLocalTime(DateTime.UtcNow, StoreAppService.CurrentStore.TimeZoneId).DayOfWeek;
+        var dayHours = menu.DayHours.FirstOrDefault(d => d.DayOfWeek == today);
+        if (dayHours == null) return new[] { "-" };
+
+        return dayHours.ToString().Split("|");
+    }
+    // private List<MenuItem> MenuItems = new List<MenuItem>()
+    // {
+    //     new MenuItem { Name = "Breakfast", StartTime = "7:00 AM", EndTime = "10:00 AM" },
+    //     new MenuItem { Name = "Lunch", StartTime = "12:00 PM", EndTime = "2:00 PM" },
+    //     new MenuItem { Name = "Dinner", StartTime = "6:00 PM", EndTime = "9:00 PM" }
+    // };
+
+    private void HandleClick(string menuName)
+    {
+        selectedMenu = menuName;
+    }
+
+    private List<FoodItem> GetFoodItems(string category) // Replace with your logic to fetch food items
+    {
+        // Replace with your data fetching logic (e.g., database call)
+        return new List<FoodItem>()
+        {
+            new FoodItem { ImageUrl = "images/food1.jpg", Name = "Food Item 1", Price = 12.99m },
+            new FoodItem { ImageUrl = "images/food2.jpg", Name = "Food Item 2", Price = 15.99m },
+            new FoodItem { ImageUrl = "images/food3.jpg", Name = "Food Item 3", Price = 12.99m },
+            new FoodItem { ImageUrl = "images/food4.jpg", Name = "Food Item 4", Price = 15.99m },
+            new FoodItem { ImageUrl = "images/food5.jpg", Name = "Food Item 5", Price = 12.99m },
+            new FoodItem { ImageUrl = "images/food6.jpg", Name = "Food Item 6", Price = 15.99m },
+            new FoodItem { ImageUrl = "images/food7.jpg", Name = "Food Item 7", Price = 12.99m },
+            new FoodItem { ImageUrl = "images/food8.jpg", Name = "Food Item 8", Price = 15.99m },        };
+    }
+
+    async Task ViewFoodOptions(FoodItem foodItem)
+    {
+        var dic = new Dictionary<string, object>();
+        dic.Add("FoodItem", foodItem);
+        dic.Add("OnChange", EventCallback.Factory.Create(this, RefreshPage));
+        var dialogOptions = new DialogOptions() { CssClass = "custom-dialog" };
+        await DialogService.OpenAsync<FoodOptions>("Food Options", dic, dialogOptions);
+    }
+
+    void RefreshPage()
+    {
+        StateHasChanged();
+    }
+
+    // class MenuItem
+    // {
+    //     public string Name { get; set; }
+    //     public string StartTime { get; set; }
+    //     public string EndTime { get; set; }
+    // }
+
+    // public class FoodItem
+    // {
+    //     public string ImageUrl { get; set; }
+    //     public string Name { get; set; }
+    //     public decimal Price { get; set; }
+    // }
+
+}
