@@ -15,6 +15,7 @@ namespace OrderDelightStoreApp.Services
         private readonly IConfiguration _configuration;
         private string ImageStorageAccountUrl { get; set; }
         public Store? CurrentStore { get; set; }
+        public List<FoodItem>? FoodItems { get; set; }
         public List<Menu>? Menus { get; set; }
         public StoreAppService(HttpClient httpClient, IConfiguration configuration)
         {
@@ -22,6 +23,7 @@ namespace OrderDelightStoreApp.Services
             _configuration = configuration;
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("x-functions-key", "ZpMsN3Kwz5S2sj4PqvYDxDVW7YLgf6PCf7Kyg65BxjR6AzFueD6r5g=="); //temporarily used, change to Oauth later
+            AddCurrentUserAndStoreHeaders("101-1", "757a7d94-473b-40ca-bc2f-b127333c1536");
             ImageStorageAccountUrl = "https://scantopay.blob.core.windows.net"; //_configuration["storage-account-url"] ?? "";
         }
 
@@ -42,11 +44,59 @@ namespace OrderDelightStoreApp.Services
             var requestUrl = $"api/store?storeid={storeId}";
             CurrentStore = await GetAsync<Store>(requestUrl);
         }
-        public async Task LoadMenuListAsync()
+        #region language related
+        public event Action OnLanguageChanged;
+        public event Action OnSupportedLanguagesChanged;
+
+        private string? _currentSelectedLanguage;
+        public string CurrentSelectedLanguage
         {
-            var requestUrl = "api/store/menus?forUI";
-            Menus = await GetAsync<List<Menu>>(requestUrl);
+            get => _currentSelectedLanguage ?? "en";
+            set
+            {
+                _currentSelectedLanguage = value;
+                OnLanguageChanged?.Invoke();
+            }
         }
+        public string ResolveLanguage(Dictionary<string, string>? dic)
+        {
+            return ResolveLanguage(dic, CurrentSelectedLanguage);
+        }
+        public string ResolveLanguage(Dictionary<string, string>? dic, string lang)
+        {
+            if (dic == null || !dic.Any()) return "";
+
+            if (dic.TryGetValue(lang, out var content))
+                return content;
+            if (dic.TryGetValue("en", out var content2))
+                return content2;
+            return dic.FirstOrDefault().Value;
+        }
+
+        public string ResolveLanguageDescription(string lang)
+        {
+            if (SystemSupportedLanguages.TryGetValue(lang, out var content))
+                return content;
+
+            return lang;
+        }
+
+        public Dictionary<string, string> SystemSupportedLanguages = new Dictionary<string, string>();
+
+        public void LoadSystemSupportedLanguages()
+        {
+            SystemSupportedLanguages.Add("en", "English");
+            SystemSupportedLanguages.Add("zh", "简体中文");
+            SystemSupportedLanguages.Add("cn", "繁体中文");
+            SystemSupportedLanguages.Add("fr", "Français"); // Corrected French
+            SystemSupportedLanguages.Add("es", "Español"); // Corrected Spanish
+        }
+        public List<Language> GetSystemSupportedLanguages()
+        {
+            return SystemSupportedLanguages.Select(kv => new Language { Code = kv.Key, Name = kv.Value }).ToList();
+        }
+
+        #endregion
         //public async Task<List<Menu>> GetActiveMenusAsync()
         //{
         //    var url = $"/products";
@@ -84,7 +134,7 @@ namespace OrderDelightStoreApp.Services
         }
         public ImageSize GetSmallFoodItemImageSize()
         {
-           // return CommonUtilities.GetImageSize(_configuration["ImageSize-FoodItem-Small"]);
+            // return CommonUtilities.GetImageSize(_configuration["ImageSize-FoodItem-Small"]);
             return CommonUtilities.GetImageSize("55,55");
         }
         public ImageSize GetLogoImageSize()
@@ -94,7 +144,7 @@ namespace OrderDelightStoreApp.Services
         }
         public ImageSize GetHeroImageSize()
         {
-           // return CommonUtilities.GetImageSize(_configuration["ImageSize-Hero"]);
+            // return CommonUtilities.GetImageSize(_configuration["ImageSize-Hero"]);
             return CommonUtilities.GetImageSize("548,200");
         }
         public async Task<List<OptInLookup>?> GetOptInsAsync(string storeId)
@@ -214,6 +264,19 @@ namespace OrderDelightStoreApp.Services
             if (CurrentStore == null) return new List<Menu>();
             var requestUrl = "api/store/menus?storeId=" + CurrentStore.StoreId;
             return await GetAsync<List<Menu>>(requestUrl);
+        }
+
+        public async Task<List<FoodItem>?> GetFoodItemsAsync()
+        {
+
+            var requestUrl = "api/store/food-items";
+            var responseString = await _httpClient.GetStringAsync(requestUrl);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            FoodItems = JsonSerializer.Deserialize<List<FoodItem>>(responseString, options);
+            return FoodItems;
         }
 
         //public async Task<List<Order>> GetOrdersAsync()
@@ -395,5 +458,7 @@ namespace OrderDelightStoreApp.Services
 
 
         #endregion
+
+
     }
 }

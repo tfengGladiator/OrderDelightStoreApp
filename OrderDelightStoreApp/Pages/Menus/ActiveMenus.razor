@@ -1,75 +1,115 @@
 ﻿@page "/menus"
 @page "/menus/{MenuId}"
-@using DayHours = OrderDelightLibrary.Shared.Models.DayHours
-
+@using MenuItem = OrderDelightLibrary.Shared.Models.MenuItem
 @inject DialogService DialogService
 @inject StoreAppService StoreAppService
-<div class="menu-container">
-    <ul style="list-style-type: none; padding: 0; display: flex; background-color: #f7f6f6; margin-bottom: 0px;">
-        @foreach (var menu in MenuList)
-        {
-            <li style="@($"cursor: pointer; padding: 10px 20px 15px 20px; border-bottom: {(menu.Name == selectedMenu ? "3px solid orange" : "none")}; text-align: center; margin:0 10px 0 10px;") "
-                @onclick="@(() => HandleClick(menu.Name))">
-                <div style="font-size: 20px; margin: 5px 0;">@menu.Name</div>
-                <div style="font-size: 14px; font-family: Helvetica, Arial, sans-serif;">
-                    @foreach (var dh in ResolveToday(menu))
-                    {
-                        <div class='display:block'>@dh</div>
-                    }
-                </div>
-            </li>
-        }
-    </ul>
+@inject IJSRuntime JSRuntime
+    @if (selectedMenu == null)
+    {
+        <div class="alert alert-danger" role="alert">
+            No active menus available.
+        </div>
+    }
+    else
+    {
+        <div class="menu-container">
+            <ul style="list-style-type: none; padding: 0; display: flex; background-color: #f7f6f6; margin-bottom: 0px;">
+                @foreach (var menu in MenuList)
+                {
+                    <li style="@($"cursor: pointer; padding: 10px 20px 15px 20px; border-bottom: {(menu.id == selectedMenu.id ? "3px solid orange" : "none")}; text-align: center; margin:0 10px 0 10px;")"
+                        @onclick="@(() => HandleClick(menu.id))">
+                        <div style="font-size: 20px; margin: 5px 0;">@menu.Name</div>
+                    </li>
+                }
+            </ul>
 
-    <RadzenTabs SelectedIndex="selectedCategory" Class="rz-p-3" TabPosition="TabPosition.TopRight">
-        <Tabs>
-            <RadzenTabsItem Text="Category 1">
-                <RadzenCard>
-                    <ul class="food-list">
-                        @foreach (var foodItem in GetFoodItems(selectedMenu))
+            <div class="nav-container">
+                <!-- Category List -->
+                <div class="categories-container">
+                    <ul class="category-list">
+                        @foreach (var cat in Categories)
                         {
+                            <li class="@(cat == selectedCategory ? "category-item selected" : "category-item")"
+                                @onclick="@(() => SelectCategory(cat))">
+                                @cat.Name
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Food Items -->
+                <div class="food-list-container">
+                    <ul class="food-list">
+                        @foreach (var menuItem in GetFoodItems(selectedCategory))
+                        {
+                            var foodItem = FoodItems.FirstOrDefault(f => f.id == menuItem.FoodItemId);
+                            if (foodItem == null) continue;
+
                             <li class="food-item">
-                                <a href="JavaScript:void(0)" @onclick="@(async() => await ViewFoodOptions(foodItem))">
-                                    <img src="@foodItem.ImageUrl" alt="@foodItem.Name" class="food-image">
+                                <a href="JavaScript:void(0)" @onclick="@(async () => await ViewFoodOptions(foodItem))">
+                                    <img src="@ResolveImagePath(foodItem)" onerror="imageError(this)" class="food-image">
+                                    <span class="food-price">@ResolveFoodItemPrice(foodItem)</span>
                                     <div class="food-info">
-                                        <span class="food-name">@foodItem.Name</span>
-                                        <span class="food-price">($@foodItem.Price)</span>
+                                        <span class="food-name">@ResolveFoodItemName(foodItem)</span>
                                     </div>
                                 </a>
                             </li>
                         }
                     </ul>
-                </RadzenCard>
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Category 2">
-                <p>Lunch content</p>
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Category 2">
-                <p>Dinner content</p>
-            </RadzenTabsItem>
-        </Tabs>
-    </RadzenTabs>
-</div>
+                </div>
+            </div>
+        </div>
+    }
+
+
 <style>
-    .menu-container {
+    /* Container for menu and categories for better alignment */
+    .nav-container {
+        display: flex;
+        flex-direction: row; /* Horizontal layout */
         width: 100%;
-        margin: 0 auto;
+    }
+
+    .categories-container {
+        width: 200px; /* Adjust width as needed */
+        margin: 20px 0 0 10px;
+        flex-grow: 1;
     }
 
     .category-list {
         list-style-type: none;
         padding: 0;
-        display: flex;
+        margin: 0;
         background-color: white;
-        border-top: 1px solid #f7f6f6;
+        display: block; /* Stack items vertically */
     }
 
-        .category-list li {
-            padding: 10px 20px;
+    .category-item {
+        padding: 15px 10px; /* Reduced padding on the right */
+        cursor: pointer;
+        text-align: left;
+        overflow: hidden; /* Prevents content from overflowing */
+        text-overflow: ellipsis; /* Adds an ellipsis to indicate hidden text */
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Limit text to two lines */
+        -webkit-box-orient: vertical;
+        height: 50px; /* Adjust height based on your design needs */
+        border-bottom: 3px solid transparent; /* Maintains layout consistency */
+    }
+
+
+        .category-item.selected {
+            background-color: #FFD2A0; /* Light orange background color */
+            color: black; /* Ensures text is readable against light background */
         }
 
     .food-list-container {
-        margin-top: 20px; /* Add some space after the category list */
+        height: 60vh; /* Set to a fixed height or based on viewport (vh) */
+        overflow-y: scroll; /* Only vertical scrolling */
+        flex-grow: 4;
+        width: 80%;
+        padding-left: 20px;
+        padding-top: 10px;
     }
 
     /* Previous styles ... */
@@ -79,7 +119,7 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-start; /* Align items to the start */
-        gap: 20px; /* Creates a gap between the flex items */
+        gap: 15px; /* Reduced gap between the flex items */
     }
 
     .food-item {
@@ -88,127 +128,187 @@
         display: flex;
         justify-content: center; /* Centers child elements horizontally */
         align-items: flex-end; /* Align children to the bottom */
-        width: 190px; /* Set a fixed width for the food item */
+        width: 180px; /* Set a reduced fixed width for the food item */
         margin: 10px; /* Adds space around each food item */
+        margin-bottom: 0; /* Adjust or remove margin-bottom if needed */
+        padding-bottom: 0; /* Adjust or remove padding-bottom if needed */
     }
 
     .food-image {
-        width: 190px; /* Fixed width as per requirement */
-        height: 190px; /* Fixed height as per requirement */
+        position: relative;
+        width: 180px; /* Adjusted fixed width */
+        height: 180px; /* Adjusted fixed height */
         object-fit: cover; /* Adjusts the image to cover the area without stretching */
+        border: 1px solid #cccccc; /* Very thin light grey border */
     }
+
 
     .food-info {
         position: absolute;
         bottom: 0; /* Align to the bottom of the food-item */
         left: 0;
         width: 100%; /* Ensure the info covers the width of the food-item */
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        height: 65px;
+        background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
         color: white;
         padding: 10px;
         box-sizing: border-box; /* Ensures padding does not add to the width */
         text-align: center; /* Center-align the text */
+        min-height: 50px; /* Adjust as needed to set a fixed height for the name section */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* This will center the content vertically */
+        align-items: center; /* Align horizontal centering */
     }
 
-    .food-name, .food-price {
-        display: block; /* Each item on its own line */
+
+    .food-price {
+        position: absolute; /* Absolute positioning relative to the food-item */
+        top: 10px; /* Space from the top edge of the food-item */
+        right: 0; /* Align to the right side of the image */
+        background: rgba(146, 211, 110, 0.9); /* Semi-transparent green background for better readability */
+        padding: 2px 10px 2px 20px; /* Adjusted padding for a better fit: less padding on the right and slightly less on the left */
+        border-radius: 30px 0 0 30px; /* Adjusted radius for a balanced look */
+        z-index: 2; /* Ensures the price is above the image */
+        font-size: 14px; /* Suitable font size for visibility */
     }
 
+
+
+    .food-name {
+        margin-top: auto; /* This pushes the name to the bottom */
+        margin-bottom: 0px; /* Space from the bottom edge of the .food-info */
+        display: flex; /* Use flexbox to center content */
+        align-items: center; /* Align vertically */
+        justify-content: center; /* Align horizontally */
+        text-align: center; /* Center text for readability */
+        height: 65px; /* Fixed height to ensure that single and multiline text is centered */
+        font-size: 14px;
+    }
 </style>
+
 @code {
 
     [Parameter] public string MenuId { get; set; } = "";
-    private int selectedCategory = 0; // Initially no selection
-    private string selectedMenu = ""; // Initially no selection
+    private Category selectedCategory; // Initially no selection
+    private List<Category> Categories = new List<Category>();
+    private Menu? selectedMenu; // Initially no selection
     ImageSize largeFoodItemImageSize;
     List<Menu> MenuList = new List<Menu>();
+    List<FoodItem>? FoodItems;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("setupScrollHandling", DotNetObjectReference.Create(this));
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        await StoreAppService.LoadStoreAsync("101-1");
-  
+        if (StoreAppService.CurrentStore == null)  
+            await StoreAppService.LoadStoreAsync("101-1");
+        if(StoreAppService.FoodItems == null)
+            FoodItems = await StoreAppService.GetFoodItemsAsync();
+        
         var storeLocalTime = CommonUtilities.ConvertToLocalTime(DateTime.UtcNow, StoreAppService.CurrentStore.TimeZoneId);
         var currentTime = storeLocalTime.TimeOfDay;
         var currentDay = storeLocalTime.DayOfWeek;
-        MenuList = await StoreAppService.GetFilteredMenusAsync();
+        if(StoreAppService.Menus == null)
+            MenuList = await StoreAppService.GetFilteredMenusAsync();
+
         MenuList = MenuList
-            .Where(m => IsMenuActive(m, currentDay, currentTime)) 
- //           .OrderBy(m => GetEarliestStartTime(m, currentDay)) 
-            .OrderBy(m => m.Name) 
+            .Where(m => IsMenuActive(m, currentDay, currentTime))
+            .OrderBy(m => GetEarliestStartTime(m, currentDay))
             .Distinct().ToList();
+        if (!MenuList.Any())
+            return; // No active menus
+
+        if (!string.IsNullOrWhiteSpace(MenuId) && MenuList.Any(m => m.id.ToLower() == MenuId.ToLower()))
+            selectedMenu = MenuList.FirstOrDefault(m => m.id.ToLower() == MenuId.ToLower());
+        else
+            selectedMenu = MenuList.FirstOrDefault();
+
+        LoadFoodItems();
+    }
+
+    private void LoadFoodItems()
+    {
+        if (selectedMenu == null) return;
+        Categories = selectedMenu.Categories.Where(c => c.FoodItems.Any()).ToList();
+        if (Categories.Any())
+            selectedCategory = Categories.FirstOrDefault();
+
+        FoodItems = selectedCategory?.FoodItems
+            .Select(fi => StoreAppService.FoodItems.FirstOrDefault(f => f.id == fi.FoodItemId))
+            .Where(f => f != null)
+            .ToList();
     }
 
     private bool IsMenuActive(Menu menu, DayOfWeek currentDay, TimeSpan currentTime)
     {
         Console.WriteLine($"Checking menu: {menu.Name}"); // Add a log here
 
-        if (menu.IsDeleted) 
-        {
-            Console.WriteLine($"\tMenu {menu.Name} is  deleted.");
-            return false; // Not active if deleted
-        } 
-
-        if (!menu.IsEnabled) 
-        {
-            Console.WriteLine($"\tMenu {menu.Name} is not enabled.");
-            return false; // Not active if not enabled
-        }
-        return true;
+        if (menu.IsDeleted || !menu.IsEnabled)
+            return false; // Not active if deleted or not enabled
 
         var matchingDayHour = menu.DayHours.FirstOrDefault(dh => dh.DayOfWeek == currentDay);
         if (matchingDayHour != null)
         {
             Console.WriteLine($"\tDayHour found for {currentDay}.");
             if (matchingDayHour.IsClosed)
-            {
-                Console.WriteLine($"\tDayHour is closed.");
                 return false; // Not active if closed
-            }
 
             if (matchingDayHour.TimeRanges.Any(tr => IsTimeRangeValid(tr, currentTime)))
-            {
-                Console.WriteLine("\tTime range matches!");
                 return true; // Active at this point
-            }
         }
-        return false; 
+        return false;
     }
 
-    private bool IsDayHourValid(DayHours dayHour, DayOfWeek currentDay, TimeSpan currentTime)
-    {
-        return dayHour.DayOfWeek == currentDay && 
-               !dayHour.IsClosed && 
-               dayHour.TimeRanges.Any(tr => IsTimeRangeValid(tr, currentTime)); 
-    }
+
 
     private bool IsTimeRangeValid(TimeRange timeRange, TimeSpan currentTime)
     {
-        if (TimeSpan.TryParse(timeRange.StartTime, out var startTime) &&
-            TimeSpan.TryParse(timeRange.EndTime, out var endTime))
+        // Attempt to parse the StartTime and EndTime into DateTime objects to handle AM/PM
+        if (DateTime.TryParse(timeRange.StartTime, out var startDateTime) &&
+            DateTime.TryParse(timeRange.EndTime, out var endDateTime))
         {
+            // Extract the TimeOfDay part, which is a TimeSpan
+            var startTime = startDateTime.TimeOfDay;
+            var endTime = endDateTime.TimeOfDay;
+
+            // Now compare with currentTime
             return currentTime >= startTime && currentTime <= endTime;
         }
         else
         {
-            Console.WriteLine($"Error parsing time range for timeRange: Start: {timeRange.StartTime}, End: {timeRange.EndTime}");
+            Console.WriteLine($"Error parsing time range: Start: {timeRange.StartTime}, End: {timeRange.EndTime}");
             return false;
         }
     }
+
 
     private TimeSpan GetEarliestStartTime(Menu menu, DayOfWeek currentDay)
     {
         return menu.DayHours
             .Where(dh => dh.DayOfWeek == currentDay)
             .SelectMany(dh => dh.TimeRanges)
-            .Select(tr => {
-                              if (TimeSpan.TryParse(tr.StartTime, out var startTime)) {
-                                  return startTime;
-                              } else {
-                                  Console.WriteLine($"Error parsing start time for menu: {menu.Name}, Start: {tr.StartTime}"); 
-                                  return TimeSpan.MaxValue;
-                              }
+            .Select(tr =>
+            {
+                if (DateTime.TryParse(tr.StartTime, out var dateTime))
+                {
+                    return dateTime.TimeOfDay;
+                }
+                else
+                {
+                    Console.WriteLine($"Error parsing start time for menu: {menu.Name}, Start: {tr.StartTime}");
+                    return TimeSpan.MaxValue; // Fallback to max value to ensure this doesn't affect the min calculation negatively.
+                }
             })
             .Min();
     }
+
 
     string[] ResolveToday(Menu menu)
     {
@@ -228,27 +328,20 @@
     //     new MenuItem { Name = "Dinner", StartTime = "6:00 PM", EndTime = "9:00 PM" }
     // };
 
-    private void HandleClick(string menuName)
+    private void HandleClick(string menuId)
     {
-        selectedMenu = menuName;
+        selectedMenu = MenuList.FirstOrDefault(m => m.id.ToLower() == menuId.ToLower()); 
+        LoadFoodItems();
     }
 
-    private List<FoodItem> GetFoodItems(string category) // Replace with your logic to fetch food items
+    private List<MenuItem> GetFoodItems(Category category) // Replace with your logic to fetch food items
     {
-        // Replace with your data fetching logic (e.g., database call)
-        return new List<FoodItem>()
-        {
-            new FoodItem { ImageUrl = "images/food1.jpg", Name = "Food Item 1", Price = 12.99m },
-            new FoodItem { ImageUrl = "images/food2.jpg", Name = "Food Item 2", Price = 15.99m },
-            new FoodItem { ImageUrl = "images/food3.jpg", Name = "Food Item 3", Price = 12.99m },
-            new FoodItem { ImageUrl = "images/food4.jpg", Name = "Food Item 4", Price = 15.99m },
-            new FoodItem { ImageUrl = "images/food5.jpg", Name = "Food Item 5", Price = 12.99m },
-            new FoodItem { ImageUrl = "images/food6.jpg", Name = "Food Item 6", Price = 15.99m },
-            new FoodItem { ImageUrl = "images/food7.jpg", Name = "Food Item 7", Price = 12.99m },
-            new FoodItem { ImageUrl = "images/food8.jpg", Name = "Food Item 8", Price = 15.99m },        };
+        if (category == null) return new List<MenuItem>();
+
+        return category.FoodItems;
     }
 
-    async Task ViewFoodOptions(FoodItem foodItem)
+    async Task ViewFoodOptions(FoodItem? foodItem)
     {
         var dic = new Dictionary<string, object>();
         dic.Add("FoodItem", foodItem);
@@ -262,18 +355,51 @@
         StateHasChanged();
     }
 
-    // class MenuItem
-    // {
-    //     public string Name { get; set; }
-    //     public string StartTime { get; set; }
-    //     public string EndTime { get; set; }
-    // }
 
-    // public class FoodItem
-    // {
-    //     public string ImageUrl { get; set; }
-    //     public string Name { get; set; }
-    //     public decimal Price { get; set; }
-    // }
+    private string ResolveImagePath(FoodItem foodItem)
+    {
+        return StoreAppService.GetFoodItemImageUrl(foodItem);
+    }
 
+    private string ResolveFoodItemName(FoodItem foodItem)
+    {
+        return StoreAppService.ResolveLanguage(foodItem.Names);
+    }
+
+    private string ResolveFoodItemPrice(FoodItem foodItem)
+    {
+        return "$25.5";
+    }
+
+    private void SelectCategory(Category category)
+    {
+        selectedCategory = category;
+    }
+
+    [JSInvokable]
+    public async Task SwitchToNextCategory()
+    {
+    // Logic to switch to the next category
+        int currentIndex = Categories.IndexOf(selectedCategory);
+        if (currentIndex < Categories.Count - 1)
+            selectedCategory = Categories[currentIndex + 1];
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task SwitchToPreviousCategory()
+    {
+    // Logic to switch to the previous category
+        int currentIndex = Categories.IndexOf(selectedCategory);
+        if (currentIndex > 0)
+            selectedCategory = Categories[currentIndex - 1];
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("removeScrollHandling");
+    }
 }

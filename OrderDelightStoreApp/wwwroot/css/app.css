@@ -1,7 +1,17 @@
-html, body {
+/*html, body {
     font-family: 'Robot', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;*/ /* Prevents scrolling on the main page */
+/*}*/
+/* Ensure the body or any global container doesn't add unexpected padding or margin */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Adjust if necessary */
+  /*   box-sizing: border-box;*/
+    overflow: hidden; /* Prevents scrolling on the main page */
 }
-
 h1:focus {
     outline: none;
 }
@@ -101,14 +111,7 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
-/* Ensure the body or any global container doesn't add unexpected padding or margin */
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%; /* Adjust if necessary */
-    min-height: 100%;
-    box-sizing: border-box;
-}
+
 
 *, *::before, *::after {
     box-sizing: inherit; /* This ensures that box-sizing is consistent across all elements */
@@ -187,4 +190,8 @@ body, html {
 .rz-tabview-nav li {
     margin-right: 2px;
 }
- 
+
+#app {
+    height: 100%;
+    overflow: auto; /* Allows scrolling inside the app div if content exceeds its height */
+}

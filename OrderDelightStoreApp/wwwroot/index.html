@@ -17,7 +17,37 @@
     <link rel="stylesheet" href="_content/Radzen.Blazor/css/default-base.css">
     <!--<link href="OrderDelightStoreApp.styles.css" rel="stylesheet" />-->
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+    <script type="text/javascript">
+        // Immediate JavaScript functions here
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/; Secure; SameSite=Strict";
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+        }
+    </script>
 </head>
 
 <body>
@@ -36,6 +66,41 @@
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script type="text/javascript" defer>
+        // Deferred JavaScript functions here
+        function imageError(image) {
+            image.onerror = ""; // Remove the onerror attribute to prevent recursive calls
+            image.src = '/images/food-default.png'; // Default image
+            return true;
+        }
+
+        window.setupScrollHandling = (dotnetHelper) => {
+            const container = document.querySelector('.food-list-container');
+            if (!container) return;
+
+            container.addEventListener('scroll', () => {
+                const atBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
+                const atTop = container.scrollTop === 0;
+
+                if (atBottom) {
+                    dotnetHelper.invokeMethodAsync('SwitchToNextCategory');
+                } else if (atTop) {
+                    dotnetHelper.invokeMethodAsync('SwitchToPreviousCategory');
+                }
+            });
+        }
+
+        window.removeScrollHandling = () => {
+            const container = document.querySelector('.food-list-container');
+            if (container) {
+                container.removeEventListener('scroll');
+            }
+        }
+
+
+      
+    </script>
+
 </body>
 
 </html>
