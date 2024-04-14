@@ -22,7 +22,7 @@ namespace OrderDelightStoreApp.Services
             _httpClient = httpClient;
             _configuration = configuration;
             _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("x-functions-key", "xxx"); //temporarily used, change to Oauth later
+            _httpClient.DefaultRequestHeaders.Add("x-functions-key", "ZpMsN3Kwz5S2sj4PqvYDxDVW7YLgf6PCf7Kyg65BxjR6AzFueD6r5g=="); //temporarily used, change to Oauth later
             AddCurrentUserAndStoreHeaders("101-1", "757a7d94-473b-40ca-bc2f-b127333c1536");
             ImageStorageAccountUrl = "https://scantopay.blob.core.windows.net"; //_configuration["storage-account-url"] ?? "";
         }

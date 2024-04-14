@@ -4,70 +4,94 @@
 @inject DialogService DialogService
 @inject StoreAppService StoreAppService
 @inject IJSRuntime JSRuntime
-    @if (selectedMenu == null)
-    {
-        <div class="alert alert-danger" role="alert">
-            No active menus available.
-        </div>
-    }
-    else
-    {
-        <div class="menu-container">
-            <ul style="list-style-type: none; padding: 0; display: flex; background-color: #f7f6f6; margin-bottom: 0px;">
-                @foreach (var menu in MenuList)
-                {
-                    <li style="@($"cursor: pointer; padding: 10px 20px 15px 20px; border-bottom: {(menu.id == selectedMenu.id ? "3px solid orange" : "none")}; text-align: center; margin:0 10px 0 10px;")"
-                        @onclick="@(() => HandleClick(menu.id))">
-                        <div style="font-size: 20px; margin: 5px 0;">@menu.Name</div>
-                    </li>
-                }
-            </ul>
+@if (selectedMenu == null)
+{
+    <div class="alert alert-danger" role="alert">
+        No active menus available.
+    </div>
+}
+else
+{
+    <div class="menu-container">
+        <RadzenRow>
+            <RadzenColumn Size="8" SizeMD="9">
+                <ul style="list-style-type: none; padding: 0; display: flex; background-color: #f7f6f6; margin-bottom: 0px; overflow-x: auto;">
+                    @foreach (var menu in MenuList)
+                    {
+                        <li style="@($"cursor: pointer; padding: 10px 20px 15px 20px; min-width:200px; max-width:300px; border-bottom: {(menu.id == selectedMenu.id ? "3px solid orange" : "none")}; text-align: center; margin:0 10px 0 10px;")"
+                            @onclick="@(() => SelectMenu(menu.id))">
+                            <div class="menu-item-name">@menu.Name</div>
+                        </li>
+                    }
+                </ul>
 
-            <div class="nav-container">
-                <!-- Category List -->
-                <div class="categories-container">
-                    <ul class="category-list">
-                        @foreach (var cat in Categories)
+            </RadzenColumn>
+            <RadzenColumn Size="4" SizeMD="3">
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    <RadzenTextBox Placeholder="Search" Style="width: 120px; margin: 15px 0 0 15px;" @bind-Value="searchTerm" Change="@SearchFoodItems" /> <RadzenButton Text="" Style="width: 50px; margin: 15px 0 0 0;" Icon="search" /> <RadzenButton Text="" Style="width: 50px; margin: 15px 20px 0 0;" Icon="clear" Click="@clearSearchText" />
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+
+
+        <div class="nav-container">
+            <!-- Category List -->
+            <div class="categories-container">
+                <RadzenCard Class="rz-mb-3 rz-background-color-success-light">
+                    @{
+                        var today = ResolveToday(selectedMenu);
+                        foreach (var time in today)
                         {
-                            <li class="@(cat == selectedCategory ? "category-item selected" : "category-item")"
-                                @onclick="@(() => SelectCategory(cat))">
-                                @cat.Name
-                            </li>
+                            <span class="category-time">@time</span>
                         }
-                    </ul>
-                </div>
+                    }
+                </RadzenCard>
 
-                <!-- Food Items -->
-                <div class="food-list-container">
-                    <ul class="food-list">
-                        @foreach (var menuItem in GetFoodItems(selectedCategory))
-                        {
-                            var foodItem = FoodItems.FirstOrDefault(f => f.id == menuItem.FoodItemId);
-                            if (foodItem == null) continue;
+                <ul class="category-list">
+                    @foreach (var cat in Categories)
+                    {
+                        <li class="@(cat == selectedCategory ? "category-item selected" : "category-item")"
+                            @onclick="@(() => SelectCategory(cat))">
+                            @cat.Name
+                        </li>
+                    }
+                </ul>
+            </div>
 
-                            <li class="food-item">
-                                <a href="JavaScript:void(0)" @onclick="@(async () => await ViewFoodOptions(foodItem))">
-                                    <img src="@ResolveImagePath(foodItem)" onerror="imageError(this)" class="food-image">
-                                    <span class="food-price">@ResolveFoodItemPrice(foodItem)</span>
-                                    <div class="food-info">
-                                        <span class="food-name">@ResolveFoodItemName(foodItem)</span>
-                                    </div>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
+            <!-- Food Items -->
+            <div class="food-list-container">
+                <ul class="food-list">
+                    @foreach (var menuItem in filteredMenuItems)
+                    {
+                        var foodItem = StoreAppService.FoodItems?.FirstOrDefault(f => f.id == menuItem.FoodItemId);
+                        if (foodItem == null) continue;
+
+                        <li class="food-item">
+                            <a href="JavaScript:void(0)" @onclick="@(async () => await ViewFoodOptions(foodItem))">
+                                <img src="@ResolveImagePath(foodItem)" onerror="imageError(this)" class="food-image">
+                                <span class="food-price">@ResolveFoodItemPrice(foodItem)</span>
+                                <div class="food-info">
+                                    <span class="food-name">@ResolveFoodItemName(foodItem)</span>
+                                </div>
+                            </a>
+                        </li>
+                    }
+                </ul>
             </div>
         </div>
-    }
-
+    </div>
+}
 
 <style>
-    /* Container for menu and categories for better alignment */
-    .nav-container {
-        display: flex;
-        flex-direction: row; /* Horizontal layout */
-        width: 100%;
+    .menu-item-name {
+        display: block; /* Ensures the element behaves as a block-level element */
+        max-width: 220px; /* Set a max-width appropriate for your design */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 20px;
+        margin: 5px 0;
+        text-align: center; /* Centering text */
     }
 
     .categories-container {
@@ -82,26 +106,28 @@
         margin: 0;
         background-color: white;
         display: block; /* Stack items vertically */
+        width: 100%; /* Ensure this parent has a set width */
     }
 
     .category-item {
-        padding: 15px 10px; /* Reduced padding on the right */
+        padding: 15px 10px;
         cursor: pointer;
         text-align: left;
-        overflow: hidden; /* Prevents content from overflowing */
-        text-overflow: ellipsis; /* Adds an ellipsis to indicate hidden text */
-        display: -webkit-box;
-        -webkit-line-clamp: 2; /* Limit text to two lines */
-        -webkit-box-orient: vertical;
-        height: 50px; /* Adjust height based on your design needs */
-        border-bottom: 3px solid transparent; /* Maintains layout consistency */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        max-width: 100%; /* This is crucial */
+        height: 50px;
+        border-bottom: 3px solid transparent;
     }
 
-
         .category-item.selected {
-            background-color: #FFD2A0; /* Light orange background color */
-            color: black; /* Ensures text is readable against light background */
+            background-color: #FFD2A0;
+            color: black;
         }
+
+
 
     .food-list-container {
         height: 60vh; /* Set to a fixed height or based on viewport (vh) */
@@ -187,6 +213,7 @@
     }
 </style>
 
+
 @code {
 
     [Parameter] public string MenuId { get; set; } = "";
@@ -195,8 +222,10 @@
     private Menu? selectedMenu; // Initially no selection
     ImageSize largeFoodItemImageSize;
     List<Menu> MenuList = new List<Menu>();
-    List<FoodItem>? FoodItems;
-
+    List<FoodItem>? SelectedCategoryFoodItems;
+    string[] TodayMenuHours = new string[] { "-" };
+    string searchTerm = "";
+    List<MenuItem> filteredMenuItems = new List<MenuItem>();
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -207,15 +236,31 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (StoreAppService.CurrentStore == null)  
+        if (StoreAppService.CurrentStore == null)
             await StoreAppService.LoadStoreAsync("101-1");
-        if(StoreAppService.FoodItems == null)
-            FoodItems = await StoreAppService.GetFoodItemsAsync();
-        
+        if (StoreAppService.FoodItems == null)
+            await StoreAppService.GetFoodItemsAsync();
+
+        await LoadActiveMenus();
+
+        TodayMenuHours = ResolveToday(selectedMenu);
+        LoadDefaultCategory();
+
+        LoadCategoryFoodItems();
+    }
+    private void LoadDefaultCategory()
+    {
+        if (selectedMenu == null) return;
+        Categories = selectedMenu.Categories.Where(c => c.FoodItems.Any()).ToList();
+        if (Categories.Any())
+            selectedCategory = Categories.FirstOrDefault();
+    }
+    private async Task LoadActiveMenus()
+    {
         var storeLocalTime = CommonUtilities.ConvertToLocalTime(DateTime.UtcNow, StoreAppService.CurrentStore.TimeZoneId);
         var currentTime = storeLocalTime.TimeOfDay;
         var currentDay = storeLocalTime.DayOfWeek;
-        if(StoreAppService.Menus == null)
+        if (StoreAppService.Menus == null)
             MenuList = await StoreAppService.GetFilteredMenusAsync();
 
         MenuList = MenuList
@@ -229,22 +274,13 @@
             selectedMenu = MenuList.FirstOrDefault(m => m.id.ToLower() == MenuId.ToLower());
         else
             selectedMenu = MenuList.FirstOrDefault();
-
-        LoadFoodItems();
     }
 
-    private void LoadFoodItems()
+    private void LoadCategoryFoodItems()
     {
-        if (selectedMenu == null) return;
-        Categories = selectedMenu.Categories.Where(c => c.FoodItems.Any()).ToList();
-        if (Categories.Any())
-            selectedCategory = Categories.FirstOrDefault();
-
-        FoodItems = selectedCategory?.FoodItems
-            .Select(fi => StoreAppService.FoodItems.FirstOrDefault(f => f.id == fi.FoodItemId))
-            .Where(f => f != null)
-            .ToList();
+        SearchFoodItems();
     }
+
 
     private bool IsMenuActive(Menu menu, DayOfWeek currentDay, TimeSpan currentTime)
     {
@@ -310,9 +346,9 @@
     }
 
 
-    string[] ResolveToday(Menu menu)
+    string[] ResolveToday(Menu? menu)
     {
-        if (StoreAppService.CurrentStore == null) return new[] { "-" };
+        if (StoreAppService.CurrentStore == null || menu == null) return new[] { "-" };
 
         Console.WriteLine("StoreAppService.CurrentStore.TimeZoneId: " + StoreAppService.CurrentStore.TimeZoneId);
         var today = CommonUtilities.ConvertToLocalTime(DateTime.UtcNow, StoreAppService.CurrentStore.TimeZoneId).DayOfWeek;
@@ -321,25 +357,17 @@
 
         return dayHours.ToString().Split("|");
     }
-    // private List<MenuItem> MenuItems = new List<MenuItem>()
-    // {
-    //     new MenuItem { Name = "Breakfast", StartTime = "7:00 AM", EndTime = "10:00 AM" },
-    //     new MenuItem { Name = "Lunch", StartTime = "12:00 PM", EndTime = "2:00 PM" },
-    //     new MenuItem { Name = "Dinner", StartTime = "6:00 PM", EndTime = "9:00 PM" }
-    // };
 
-    private void HandleClick(string menuId)
+    private void SelectMenu(string menuId)
     {
-        selectedMenu = MenuList.FirstOrDefault(m => m.id.ToLower() == menuId.ToLower()); 
-        LoadFoodItems();
+        selectedMenu = MenuList.FirstOrDefault(m => m.id.ToLower() == menuId.ToLower());
+        TodayMenuHours = ResolveToday(selectedMenu);
+        LoadDefaultCategory();
+        LoadCategoryFoodItems();
+        StateHasChanged();
     }
 
-    private List<MenuItem> GetFoodItems(Category category) // Replace with your logic to fetch food items
-    {
-        if (category == null) return new List<MenuItem>();
 
-        return category.FoodItems;
-    }
 
     async Task ViewFoodOptions(FoodItem? foodItem)
     {
@@ -363,7 +391,7 @@
 
     private string ResolveFoodItemName(FoodItem foodItem)
     {
-        return StoreAppService.ResolveLanguage(foodItem.Names);
+        return foodItem.Code + " - " + StoreAppService.ResolveLanguage(foodItem.Names);
     }
 
     private string ResolveFoodItemPrice(FoodItem foodItem)
@@ -373,13 +401,15 @@
 
     private void SelectCategory(Category category)
     {
+        searchTerm = "";
         selectedCategory = category;
+        SearchFoodItems();
     }
 
     [JSInvokable]
     public async Task SwitchToNextCategory()
     {
-    // Logic to switch to the next category
+        // Logic to switch to the next category
         int currentIndex = Categories.IndexOf(selectedCategory);
         if (currentIndex < Categories.Count - 1)
             selectedCategory = Categories[currentIndex + 1];
@@ -390,7 +420,7 @@
     [JSInvokable]
     public async Task SwitchToPreviousCategory()
     {
-    // Logic to switch to the previous category
+        // Logic to switch to the previous category
         int currentIndex = Categories.IndexOf(selectedCategory);
         if (currentIndex > 0)
             selectedCategory = Categories[currentIndex - 1];
@@ -401,5 +431,26 @@
     public async ValueTask DisposeAsync()
     {
         await JSRuntime.InvokeVoidAsync("removeScrollHandling");
+    }
+
+    void SearchFoodItems()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            filteredMenuItems = selectedCategory.FoodItems;
+        }
+        else
+        {
+            var foodItems = StoreAppService.FoodItems.Where(f => f.Name.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase)).Select(f => f.id).ToList();
+            filteredMenuItems = selectedMenu.Categories.SelectMany(c => c.FoodItems).Where(f => foodItems.Contains(f.FoodItemId)).ToList();
+        }
+
+        StateHasChanged(); // Re-render the component with the new filtered list
+    }
+
+    void clearSearchText()
+    {
+        searchTerm = "";
+        SearchFoodItems();
     }
 }

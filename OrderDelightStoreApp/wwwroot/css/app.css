@@ -195,3 +195,11 @@ code {
     height: 100%;
     overflow: auto; /* Allows scrolling inside the app div if content exceeds its height */
 }
+
+/* ActiveMenu */
+/* Container for menu and categories for better alignment */
+.nav-container {
+    display: flex;
+    flex-direction: row; /* Horizontal layout */
+    width: 100%;
+}

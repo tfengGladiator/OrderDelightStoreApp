@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "OrderDelightStoreApp",
   "resources": {
-    "hash": "sha256-GwJ4czl+SHw8z1eFXdU7X9B4rxNTbgbRMUmbtxlhHms=",
+    "hash": "sha256-TXWxfnPxjzilABLb6klHMU6FFG4xWprvUcgqIC4rQ9Q=",
     "jsModuleNative": {
       "dotnet.native.8.0.2.o8xsdjjzut.js": "sha256-gPMK16QWoJSTxorlZJqcVtbBRTniIQWlLsJN2O4cJHg="
     },
@@ -260,12 +260,12 @@
       "System.Private.CoreLib.wasm": "sha256-I2w0iHf5nvSQyF1YE1VbgdTzmmz6a4OE6J7vo5wFa/4=",
       "OrderDelightLibrary.wasm": "sha256-7/g0H0r/9jGWb0m/4z/06osn5ebhLO/1u/qT+LnKFmc=",
       "OrderDelightLibrary.Shared.wasm": "sha256-zDs8b9mYTS+Qz3dGslaZvExEjBe/GDwikGYZGhWNs5k=",
-      "OrderDelightStoreApp.wasm": "sha256-mPzu8jzNQcVrNIZnzMQpKjmof+668ghrIEjnThw+Bco="
+      "OrderDelightStoreApp.wasm": "sha256-Hf6cLzg8Wwt10RcaAa3JhiyA62/AI3uo2DlgHie+eU4="
     },
     "pdb": {
       "OrderDelightLibrary.pdb": "sha256-AqT0aellUyWTsWLBtMzDvleqTP5CWHQJ4Irr5Klu01M=",
       "OrderDelightLibrary.Shared.pdb": "sha256-GeMtCVEdcaMplx1kQMFRERl656g2c75TpiWeN1MzcFI=",
-      "OrderDelightStoreApp.pdb": "sha256-dMlbrpoIhRNteMhRpbWwmbuS46ocWTxYJKJkSZ/cxUY="
+      "OrderDelightStoreApp.pdb": "sha256-cXGIdm1cRu0pgeblCgRWNsG9usPklBFiPhSEwwY1Eus="
     }
   },
   "cacheBootResources": true,

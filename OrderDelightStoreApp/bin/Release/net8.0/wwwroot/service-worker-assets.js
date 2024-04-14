@@ -1,7 +1,7 @@
 ﻿self.assetsManifest = {
   "assets": [
     {
-      "hash": "sha256-OThdEHTw+IKESTvw5yJLEe6DVHbAHbP1kHJmD\/4swV8=",
+      "hash": "sha256-+Ml\/wepl4aJnprngiCe6xNtlRkumc69viF4VK4w+otk=",
       "url": "css\/app.css"
     },
     {
@@ -105,7 +105,7 @@
       "url": "images\/profile.jpg"
     },
     {
-      "hash": "sha256-7mmnnQZfLC2H3pKLu5P+G8R\/VC8xYTnUY\/xCyhnAD9k=",
+      "hash": "sha256-MohzS3vNzDEra3fmBrhF3uDg3+aO3esaDINLb7zvQxc=",
       "url": "index.html"
     },
     {
@@ -1141,15 +1141,15 @@
       "url": "_framework\/OrderDelightLibrary.Shared.pdb"
     },
     {
-      "hash": "sha256-mPzu8jzNQcVrNIZnzMQpKjmof+668ghrIEjnThw+Bco=",
+      "hash": "sha256-Hf6cLzg8Wwt10RcaAa3JhiyA62\/AI3uo2DlgHie+eU4=",
       "url": "_framework\/OrderDelightStoreApp.wasm"
     },
     {
-      "hash": "sha256-dMlbrpoIhRNteMhRpbWwmbuS46ocWTxYJKJkSZ\/cxUY=",
+      "hash": "sha256-cXGIdm1cRu0pgeblCgRWNsG9usPklBFiPhSEwwY1Eus=",
       "url": "_framework\/OrderDelightStoreApp.pdb"
     },
     {
-      "hash": "sha256-oJw4uYo\/l2hTIxjlzUHOVQWcTLZ6NKQUEuNORuv\/7do=",
+      "hash": "sha256-9WGv2DmG+8HWLS+4vxFq\/KZqs255HAidAa1n2XN9zeQ=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -1349,5 +1349,5 @@
       "url": "_content\/Radzen.Blazor\/Radzen.Blazor.js"
     }
   ],
-  "version": "iQz0+dGX"
+  "version": "v\/6y4lqK"
 };
