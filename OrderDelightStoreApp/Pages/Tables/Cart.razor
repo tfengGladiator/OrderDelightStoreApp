@@ -1,0 +1,113 @@
+﻿@page "/tables/shoppingcart/{tableId}"
+@inject StoreAppService StoreAppService
+@if (StoreAppService.FloorTables == null || selectedTable == null)
+{
+    <div class="alert alert-danger" role="alert">
+        Table not found.
+    </div>
+}
+else
+{
+    <RadzenRow>
+        <RadzenColumn Size="12" SizeMD="5">
+            <RadzenCard Class="rz-m-3 rz-p-5">
+                <RadzenRow>
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <div style="display: flex; align-items: center; justify-content: flex-start;">
+                            <span style="font-weight:bold; margin-right:10px;">Table:</span> <span>@selectedTable.TableName</span>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <span style="font-weight:bold; margin-right:10px;">Guests:</span> <span>6/@selectedTable.Max</span>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: flex-end;">
+                            <span style="font-weight:bold; margin-right:10px;">Starts:</span> <span>11:30 am</span>
+                        </div>
+                    </div>
+                </RadzenRow>
+
+                <hr/>
+
+                <RadzenRow>
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <div style="display: flex; align-items: center; justify-content: flex-start;">
+                            <span style="color:#E11D07; font-weight:bold">Status:</span>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: flex-end;">
+                            <span>Order Placed at 11:50am</span>
+                        </div>
+                    </div>
+                </RadzenRow>
+                <hr/>
+
+                <RadzenRow>
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <div style="display: flex; align-items: center; justify-content: flex-start;">
+                            <span style="font-weight:bold">Order Placed By:</span>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: flex-end;">
+                            <span>TF20203-203</span>
+                        </div>
+                    </div>
+                </RadzenRow>
+                <hr/>
+
+                <RadzenRow Class="rz-py-3">
+                    <RadzenColumn Size="12" SizeMD="12" Class="text-left">
+                        <span style="font-weight:bold">Table A5 QR Code</span>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="12" Class="d-flex justify-content-center">
+                        <img src="images/QR.jpg" style="width:300px;"/>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow Class="rz-py-3">
+                    <RadzenColumn Size="12" SizeMD="12">
+                        <RadzenText Text="Table Status:" Style="font-weight:bold"></RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow Class="rz-py-3">
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenBadge BadgeStyle="BadgeStyle.Success" Style="padding:10px;">@(tableStatus?.Status ?? "Available")</RadzenBadge>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenButton Text="Make Table Available" ButtonStyle="ButtonStyle.Primary"></RadzenButton>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenCard>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="7">
+            <RadzenDataGrid TItem="FoodItemSelected" Data="@lastShoppingCart?.Rounds[0].FoodItemsSelected" AllowPaging="true" PageSize="5">
+                <Columns>
+                    <RadzenDataGridColumn TItem="ShoppingCart" Property="ItemName" Title="Item Name" />
+                    <RadzenDataGridColumn TItem="ShoppingCart" Property="Quantity" Title="Quantity" />
+                    <RadzenDataGridColumn TItem="ShoppingCart" Property="Price" Title="Price" />
+                    <RadzenDataGridColumn TItem="ShoppingCart" Property="Total" Title="Total" />
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
+}
+@code {
+    [Parameter] public string tableId { get; set; }
+    private List<ShoppingCart>? shoppingCarts;
+    private ShoppingCart? lastShoppingCart;
+    private TableStatus? tableStatus;
+    private Table? selectedTable;
+    protected override async Task OnInitializedAsync()
+    {
+        if (StoreAppService.FloorTables == null)
+            await StoreAppService.LoadFloorTables();
+
+        selectedTable = StoreAppService.FloorTables?.SelectMany(t => t.Tables).FirstOrDefault(t => t.TableId == tableId);
+
+        shoppingCarts = await StoreAppService.GetShoppingCartsAsync(tableId);
+        if (shoppingCarts != null && shoppingCarts.Any())
+        {
+            lastShoppingCart = shoppingCarts.LastOrDefault();
+        }
+        tableStatus = await StoreAppService.GetTableStatusAsync(tableId);
+    }
+
+   
+}

@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-
+@inject StoreAppService StoreAppService
 <div class="top-bar">
     <RadzenRow Class="custom-content-justify-full-width rz-py-3">
         <!-- Left Column for Language Selector -->
@@ -12,17 +12,18 @@
               </RadzenStack>
         </RadzenColumn>
 
-        <RadzenColumn Size="12" SizeMD="6" Class="d-flex justify-content-start">
+        <RadzenColumn Size="12" SizeMD="5" Class="d-flex justify-content-start">
             <div style="width: auto;" class="rz-pb-3">
                 <RadzenText Text="Store Management" Style="font-size: 28px; margin:18px 0 0 30px; color:white;"/>
             </div>
         </RadzenColumn>
 
         <!-- Right Column for Button -->
-        <RadzenColumn Size="12" SizeMD="4" Class="d-flex justify-content-end">
+        <RadzenColumn Size="12" SizeMD="5" Class="d-flex justify-content-end">
             <div style="width: auto;" class="rz-pb-3">
                 <RadzenStack Orientation="Orientation.Horizontal">
-                    <RadzenText Text="Whitehorn Bistro 213-1" Style="font-size: 16px; margin:18px 0 0 15px; color:white;"/>
+                    <LanguageSelector />
+                    <RadzenText Text="Whitehorn Bistro 213-1" Style="font-size: 16px; margin:8px 8px 0 15px; color:white;"/>
                     <div style="width:195px;background-color:white; height:90px;margin-top:-22px;margin-right:-20px; border:1px dashed;">
                         <RadzenImage Path="/images/OD-logo.png" Style="width:60px;height:60px;border-radius:30px;padding-bottom:5px;margin-right:-10px;"></RadzenImage>
                     </div>
@@ -70,3 +71,12 @@
     /* Adjust padding or margin as needed */
   }
 </style>
+
+@code {
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     StoreAppService.AddCurrentUserAndStoreHeaders("101-1", "757a7d94-473b-40ca-bc2f-b127333c1536");
+    // }
+
+}

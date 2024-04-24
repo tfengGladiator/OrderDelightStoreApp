@@ -1,0 +1,240 @@
+﻿@using OrderDelightLibrary.Shared.Services
+@using FoodItemsSelectionForGroup = OrderDelightLibrary.Shared.Models.FoodItemsSelectionForGroup
+@using OptionSelection = OrderDelightLibrary.Shared.Models.OptionSelection
+@inject StoreAppService StoreAppService
+@inject NotificationService NotificationService
+@inject SharedService SharedService
+@inject DialogService DialogService
+@if (FoodItem == null)
+{
+    <RadzenText Text="Please select a food item" Class="rz-text-align-center rz-my-3"></RadzenText>
+    return;
+}
+else
+{
+    <RadzenCard>
+        <RadzenRow>
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenLabel Class="rz-my-1" Style="font-weight:bold" Text="@(FoodItem.Code + " - " + StoreAppService.ResolveLanguage(FoodItem.Names))"></RadzenLabel> - <RadzenLabel Class="rz-my-1" Text="@(ResolveFoodItemPrice(FoodItem))"></RadzenLabel>
+                <RadzenText Class="rz-mt-2 rz-mb-5" Text="@(StoreAppService.ResolveLanguage(FoodItem.Descriptions))"></RadzenText>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenButton Text="Change to Out of Stock" Icon="fastfood" Visible="@(FoodItem.Status == "Available")" Click="ChangeToOutOfStock" ButtonStyle="ButtonStyle.Primary"></RadzenButton>
+                <RadzenButton Text="Change to Available" Icon="fastfood" Visible="@(FoodItem.Status == "OutOfStock")" Click="ChangeToAvailable" ButtonStyle="ButtonStyle.Primary"></RadzenButton>
+            </RadzenColumn>
+        </RadzenRow>
+
+        @foreach (var os in CurrentSelectedOptionSets)
+        {
+            <RadzenStack Orientation="Orientation.Vertical">
+                <div class="row custom-font-size rz-text-uppercase rz-pb-3">
+                    <RadzenIcon Icon="menu" class="rz-mr-3" /> @StoreAppService.ResolveOptionSetName(os.OptionSetId) <RadzenText Text="(*)" Visible="@os.IsRequired"></RadzenText>
+                </div>
+                <RadzenRow Class="rz-p-2">
+                    <RadzenColumn Size="12" SizeMD="12">
+                        <RadzenDataGrid ColumnWidth="150px" Data="@os.Options" TItem="OptionSelection" Style="padding:0; margin:-20px 0 20px 30px;" EmptyText="Please select options">
+                            <Columns>
+                                <RadzenDataGridColumn Title="Name" TItem="OptionSelection">
+                                    <Template Context="optionSelection">
+                                        @StoreAppService.ResolveLanguage(GetOptionItem(os.OptionSetId, optionSelection.OptionId)?.Names)
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Price" TItem="OptionSelection">
+                                    <Template Context="optionSelection">
+                                        @optionSelection.ExtraPrice.ToString("N2")
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Quantity" TItem="OptionSelection">
+                                    <Template Context="optionSelection">
+                                        -
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+
+        }
+        @foreach (var groupSelection in CurrentSelectedGroupSelections)
+        {
+            <RadzenStack Orientation="Orientation.Vertical">
+                <div class="row custom-font-size rz-text-uppercase rz-pb-3">
+                    <RadzenStack Orientation="Orientation.Horizontal">
+                        <RadzenIcon Icon="menu" class="rz-mr-3" /> @StoreAppService.ResolveLanguage(groupSelection.FoodItemGroupNames) <RadzenText Text="(*)" Visible="@groupSelection.IsRequiredOption"></RadzenText>
+                        @if (groupSelection.AllowSelectMultiple)
+                        {
+                            <RadzenText class="rz-ml-3">(Min @groupSelection.MinQuantity - Max @groupSelection.MaxQuantity)</RadzenText>
+                        }
+                    </RadzenStack>
+                </div>
+                <RadzenRow Class="rz-p-2">
+                    <RadzenColumn Size="12" SizeMD="12">
+                        <RadzenDataGrid ColumnWidth="150px" Data="@groupSelection.FoodItemSelections" TItem="FoodItemsSelectionForGroup" Style="padding:0; margin:-20px 0 20px 30px;">
+                            <Columns>
+                                <RadzenDataGridColumn Title="Name" TItem="FoodItemsSelectionForGroup">
+                                    <Template Context="FoodItemsSelectionForGroup">
+                                        @ResolveNameColumn(FoodItemsSelectionForGroup.FoodItemId)
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Price" TItem="FoodItemsSelectionForGroup">
+                                    <Template Context="FoodItemsSelectionForGroup">
+                                        @FoodItemsSelectionForGroup.ExtraPrice.ToString("N2")
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Allow Quantity" TItem="FoodItemsSelectionForGroup">
+                                    <Template Context="FoodItemsSelectionForGroup">
+                                        <RadzenText>@(FoodItemsSelectionForGroup.AllowQuantity ? "Yes" : "-")</RadzenText>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+
+        }
+    </RadzenCard>
+}
+
+@if (RelatedActivePriceLists.Any())
+{
+    <RadzenText Text="Prices in price lists" Class="rz-text-align-center rz-my-3"></RadzenText>
+    <RadzenCard>
+        <RadzenRow Class="rz-p-2">
+            <RadzenColumn Size="12" SizeMD="12">
+                <RadzenDataGrid ColumnWidth="150px" Data="@RelatedActivePriceLists" TItem="PriceList" Style="padding:0; margin:-20px 0 20px 30px;">
+                    <Columns>
+                        <RadzenDataGridColumn Title="Price List" TItem="PriceList">
+                            <Template Context="priceList">
+                                @priceList.Name
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="Date Range" TItem="PriceList">
+                            <Template Context="priceList">
+                                @priceList.StartDate?.ToString("yyyy-MM-dd") - @priceList.EndDate?.ToString("yyyy-MM-dd")
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="Price" TItem="PriceList">
+                            <Template Context="priceList">
+                                @ResolvePrice(priceList)
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
+}
+@code {
+    [Parameter] public Menu SelectedMenu { get; set; }
+    [Parameter] public FoodItem FoodItem { get; set; }
+    [Parameter] public EventCallback OnChange { get; set; }
+    protected List<OrderDelightLibrary.Shared.Models.OptionSetSelection> CurrentSelectedOptionSets { get; set; }
+    protected List<OrderDelightLibrary.Shared.Models.GroupSelection> CurrentSelectedGroupSelections { get; set; }
+    List<PriceList> RelatedActivePriceLists { get; set; } = new List<PriceList>();
+    protected override async Task OnInitializedAsync()
+    {
+        if (StoreAppService.OptionSets == null)
+            await StoreAppService.GetOptionSetsAsync();
+
+        var activePriceLists = StoreAppService.GetActivePriceLists(SelectedMenu);
+        RelatedActivePriceLists = activePriceLists.Where(p => p.PriceListItems.Any(pli => pli.FoodItem.id == FoodItem.id)).ToList();
+        LoadData();
+    }
+
+    private string ResolveFoodItemPrice(FoodItem foodItem)
+    {
+        if (SelectedMenu == null)
+            return "N/A";
+        var priceLists = StoreAppService.GetActivePriceLists(SelectedMenu);
+        var price = StoreAppService.GetLowestFoodItemPrice(foodItem, priceLists);
+        return price.ToString("C");
+    }
+
+    private string ResolvePrice(PriceList priceList)
+    {
+        var priceListItem = priceList.PriceListItems.FirstOrDefault(pli => pli.FoodItem.id == FoodItem.id);
+        if (priceListItem == null)
+            return "N/A";
+        return priceListItem.Price.ToString("C");
+    }
+
+    void LoadData()
+    {
+        CurrentSelectedOptionSets = SharedService.CleanupOptionSets(FoodItem.OptionSets, StoreAppService.OptionSets).OrderBy(os => os.OptionSetId).ToList();
+        CurrentSelectedGroupSelections = SharedService.CleanupGroupSelections(FoodItem.GroupSelections, StoreAppService.FoodItems).OrderBy(g => g.GroupId).ToList();
+        StateHasChanged();
+    }
+    string ResolveOptionSetName(OrderDelightLibrary.Shared.DTOs.OptionSetSelection optionSetSelection)
+    {
+        var optionSet = StoreAppService.OptionSets?.FirstOrDefault(os => os.id == optionSetSelection.OptionSetId);
+        return optionSet == null ? "N/A" : StoreAppService.ResolveLanguage(optionSet.Names);
+    }
+
+    string ResolveNameColumn(string foodItemId)
+    {
+        var foodItem = GetFoodItem(foodItemId);
+        if (foodItem == null) return "";
+        return foodItem.Code + " - " + StoreAppService.ResolveLanguage(foodItem.Names);
+    }
+
+    FoodItem? GetFoodItem(string foodItemId)
+    {
+        return StoreAppService.FoodItems?.FirstOrDefault(fi => fi.id == foodItemId);
+    }
+
+    OptionItem? GetOptionItem(string optionSetId, string optionId)
+    {
+        //Get OptionItem from StoreService.OptionSet based on optionSetId and optionId
+        var optionSet = StoreAppService.OptionSets?.FirstOrDefault(os => os.id == optionSetId);
+        if (optionSet == null) return null;
+        return optionSet.OptionItems.FirstOrDefault(oi => oi.OptionId == optionId);
+    }
+
+    async Task ChangeToOutOfStock()
+    {
+        var foodItemStatusIn = new FoodItemStatusIn()
+            {
+                FoodItemId = FoodItem.id,
+                Status = "OutOfStock"
+            };
+        try
+        {
+            await StoreAppService.UpdateFoodItemStatusAsync(foodItemStatusIn);
+            await OnChange.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Error occurred when updating status.");
+        }
+        if (OnChange.HasDelegate)
+        {
+            await OnChange.InvokeAsync(null);
+        }
+        DialogService.Close();
+    }
+
+    async Task ChangeToAvailable()
+    {
+        var foodItemStatusIn = new FoodItemStatusIn()
+        {
+            FoodItemId = FoodItem.id,
+            Status = "Available"
+        };
+        try         
+        {
+            await StoreAppService.UpdateFoodItemStatusAsync(foodItemStatusIn);
+            await OnChange.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Error occurred when updating status.");
+        }
+        if (OnChange.HasDelegate)
+        {
+            await OnChange.InvokeAsync(null);
+        }
+        DialogService.Close();
+    }
+}

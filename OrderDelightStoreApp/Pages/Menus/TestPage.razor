@@ -1,0 +1,13 @@
+﻿@page "/testdialog"
+@inject DialogService DialogService
+
+<button @onclick="OpenDialog">Open Basic Dialog</button>
+
+@code {
+    private async Task OpenDialog()
+    {
+        await DialogService.OpenAsync<Dialog>("Test Dialog",
+            new Dictionary<string, object>(),
+            new DialogOptions() { Width = "300px" });
+    }
+}

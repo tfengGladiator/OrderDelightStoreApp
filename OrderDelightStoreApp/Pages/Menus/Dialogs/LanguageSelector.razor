@@ -1,0 +1,61 @@
+﻿@inject StoreAppService StoreAppService
+@if (StoreAppService.CurrentStore?.SupportedLanguages.Count > 1)
+{
+    <div class="rz-pb-3 rz-text-align-left">
+        <RadzenSelectBar @bind-Value=@StoreAppService.CurrentSelectedLanguage TValue="string" Change="@OnLanguageChanged">
+            <Items>
+                @foreach (var language in StoreAppService.CurrentStore.SupportedLanguages)
+                {
+                    <RadzenSelectBarItem Text="@ResolveLanguage(language)" Value="@language" />
+                }
+            </Items>
+        </RadzenSelectBar>
+    </div>
+}
+
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        if (StoreAppService.CurrentStore == null)
+            await StoreAppService.LoadStoreAsync("101-1");
+
+        StoreAppService.OnLanguageChanged += UpdateLanguageSelection;
+        StoreAppService.OnSupportedLanguagesChanged += UpdateLanguages;
+        Console.WriteLine("OnInitializedAsync got called from Language Selector");
+    }
+
+    private void UpdateLanguageSelection()
+    {
+    // Force the component to re-render to reflect the latest language selection
+        StateHasChanged();
+    }
+    private void UpdateLanguages()
+    {
+    // Update the UI or reload the languages
+        StateHasChanged(); // This will request a UI update
+    }
+
+    // Clean up: Unsubscribe from the event to avoid memory leaks
+    public void Dispose()
+    {
+        StoreAppService.OnLanguageChanged -= UpdateLanguageSelection;
+        StoreAppService.OnSupportedLanguagesChanged -= UpdateLanguages;
+    }
+
+    private void OnLanguageChanged(string newLanguage)
+    {
+        StoreAppService.CurrentSelectedLanguage = newLanguage;
+    }
+
+
+    private string ResolveLanguage(string language)
+    {
+        if (StoreAppService.SystemSupportedLanguages.TryGetValue(language, out string lang))
+        {
+            return lang;
+        }
+
+        return "en";
+    }
+}

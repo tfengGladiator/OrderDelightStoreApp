@@ -1,9 +1,9 @@
 ﻿@page "/menus"
 @page "/menus/{MenuId}"
-@using MenuItem = OrderDelightLibrary.Shared.Models.MenuItem
 @inject DialogService DialogService
 @inject StoreAppService StoreAppService
 @inject IJSRuntime JSRuntime
+ 
 @if (selectedMenu == null)
 {
     <div class="alert alert-danger" role="alert">
@@ -14,19 +14,18 @@ else
 {
     <div class="menu-container">
         <RadzenRow>
-            <RadzenColumn Size="8" SizeMD="9">
+            <RadzenColumn Size="12" SizeMD="9">
                 <ul style="list-style-type: none; padding: 0; display: flex; background-color: #f7f6f6; margin-bottom: 0px; overflow-x: auto;">
                     @foreach (var menu in MenuList)
                     {
                         <li style="@($"cursor: pointer; padding: 10px 20px 15px 20px; min-width:200px; max-width:300px; border-bottom: {(menu.id == selectedMenu.id ? "3px solid orange" : "none")}; text-align: center; margin:0 10px 0 10px;")"
                             @onclick="@(() => SelectMenu(menu.id))">
-                            <div class="menu-item-name">@menu.Name</div>
+                            <div class="menu-item-name">@(StoreAppService.ResolveLanguage(menu.Names))</div>
                         </li>
                     }
                 </ul>
-
             </RadzenColumn>
-            <RadzenColumn Size="4" SizeMD="3">
+            <RadzenColumn Size="12" SizeMD="3">
                 <RadzenStack Orientation="Orientation.Horizontal">
                     <RadzenTextBox Placeholder="Search" Style="width: 120px; margin: 15px 0 0 15px;" @bind-Value="searchTerm" Change="@SearchFoodItems" /> <RadzenButton Text="" Style="width: 50px; margin: 15px 0 0 0;" Icon="search" /> <RadzenButton Text="" Style="width: 50px; margin: 15px 20px 0 0;" Icon="clear" Click="@clearSearchText" />
                 </RadzenStack>
@@ -42,7 +41,7 @@ else
                         var today = ResolveToday(selectedMenu);
                         foreach (var time in today)
                         {
-                            <span class="category-time">@time</span>
+                            <div class="category-time">@time</div>
                         }
                     }
                 </RadzenCard>
@@ -61,19 +60,16 @@ else
             <!-- Food Items -->
             <div class="food-list-container">
                 <ul class="food-list">
-                    @foreach (var menuItem in filteredMenuItems)
+                    @foreach (var menuItem in filteredMenuFoodItems)
                     {
-                        var foodItem = StoreAppService.FoodItems?.FirstOrDefault(f => f.id == menuItem.FoodItemId);
-                        if (foodItem == null) continue;
-
-                        <li class="food-item">
-                            <a href="JavaScript:void(0)" @onclick="@(async () => await ViewFoodOptions(foodItem))">
-                                <img src="@ResolveImagePath(foodItem)" onerror="imageError(this)" class="food-image">
-                                <span class="food-price">@ResolveFoodItemPrice(foodItem)</span>
+                        <li class="food-item" @onclick="@(async () => await ViewFoodOptions(menuItem.FoodItem))">
+                         @*    <a href="JavaScript:void(0)" > *@
+                                <img src="@ResolveImagePath(menuItem.FoodItem)" onerror="imageError(this)" class="food-image">
+                                <span class="food-price">@ResolveFoodItemPrice(menuItem.FoodItem)</span>
                                 <div class="food-info">
-                                    <span class="food-name">@ResolveFoodItemName(foodItem)</span>
+                                    <span class="food-name">@ResolveFoodItemName(menuItem.FoodItem)</span>
                                 </div>
-                            </a>
+                        @*     </a> *@
                         </li>
                     }
                 </ul>
@@ -83,134 +79,9 @@ else
 }
 
 <style>
-    .menu-item-name {
-        display: block; /* Ensures the element behaves as a block-level element */
-        max-width: 220px; /* Set a max-width appropriate for your design */
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 20px;
-        margin: 5px 0;
-        text-align: center; /* Centering text */
-    }
 
-    .categories-container {
-        width: 200px; /* Adjust width as needed */
-        margin: 20px 0 0 10px;
-        flex-grow: 1;
-    }
+   
 
-    .category-list {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        background-color: white;
-        display: block; /* Stack items vertically */
-        width: 100%; /* Ensure this parent has a set width */
-    }
-
-    .category-item {
-        padding: 15px 10px;
-        cursor: pointer;
-        text-align: left;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: block;
-        max-width: 100%; /* This is crucial */
-        height: 50px;
-        border-bottom: 3px solid transparent;
-    }
-
-        .category-item.selected {
-            background-color: #FFD2A0;
-            color: black;
-        }
-
-
-
-    .food-list-container {
-        height: 60vh; /* Set to a fixed height or based on viewport (vh) */
-        overflow-y: scroll; /* Only vertical scrolling */
-        flex-grow: 4;
-        width: 80%;
-        padding-left: 20px;
-        padding-top: 10px;
-    }
-
-    /* Previous styles ... */
-    .food-list {
-        list-style-type: none;
-        padding: 0;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start; /* Align items to the start */
-        gap: 15px; /* Reduced gap between the flex items */
-    }
-
-    .food-item {
-        position: relative;
-        flex: 0 1 auto; /* Allows the box to not grow but shrink if needed, without setting a base size */
-        display: flex;
-        justify-content: center; /* Centers child elements horizontally */
-        align-items: flex-end; /* Align children to the bottom */
-        width: 180px; /* Set a reduced fixed width for the food item */
-        margin: 10px; /* Adds space around each food item */
-        margin-bottom: 0; /* Adjust or remove margin-bottom if needed */
-        padding-bottom: 0; /* Adjust or remove padding-bottom if needed */
-    }
-
-    .food-image {
-        position: relative;
-        width: 180px; /* Adjusted fixed width */
-        height: 180px; /* Adjusted fixed height */
-        object-fit: cover; /* Adjusts the image to cover the area without stretching */
-        border: 1px solid #cccccc; /* Very thin light grey border */
-    }
-
-
-    .food-info {
-        position: absolute;
-        bottom: 0; /* Align to the bottom of the food-item */
-        left: 0;
-        width: 100%; /* Ensure the info covers the width of the food-item */
-        height: 65px;
-        background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
-        color: white;
-        padding: 10px;
-        box-sizing: border-box; /* Ensures padding does not add to the width */
-        text-align: center; /* Center-align the text */
-        min-height: 50px; /* Adjust as needed to set a fixed height for the name section */
-        display: flex;
-        flex-direction: column;
-        justify-content: center; /* This will center the content vertically */
-        align-items: center; /* Align horizontal centering */
-    }
-
-
-    .food-price {
-        position: absolute; /* Absolute positioning relative to the food-item */
-        top: 10px; /* Space from the top edge of the food-item */
-        right: 0; /* Align to the right side of the image */
-        background: rgba(146, 211, 110, 0.9); /* Semi-transparent green background for better readability */
-        padding: 2px 10px 2px 20px; /* Adjusted padding for a better fit: less padding on the right and slightly less on the left */
-        border-radius: 30px 0 0 30px; /* Adjusted radius for a balanced look */
-        z-index: 2; /* Ensures the price is above the image */
-        font-size: 14px; /* Suitable font size for visibility */
-    }
-
-
-
-    .food-name {
-        margin-top: auto; /* This pushes the name to the bottom */
-        margin-bottom: 0px; /* Space from the bottom edge of the .food-info */
-        display: flex; /* Use flexbox to center content */
-        align-items: center; /* Align vertically */
-        justify-content: center; /* Align horizontally */
-        text-align: center; /* Center text for readability */
-        height: 65px; /* Fixed height to ensure that single and multiline text is centered */
-        font-size: 14px;
-    }
 </style>
 
 
@@ -225,7 +96,7 @@ else
     List<FoodItem>? SelectedCategoryFoodItems;
     string[] TodayMenuHours = new string[] { "-" };
     string searchTerm = "";
-    List<MenuItem> filteredMenuItems = new List<MenuItem>();
+    List<MenuFoodItem> filteredMenuFoodItems = new List<MenuFoodItem>();
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -236,10 +107,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        if (StoreAppService.CurrentStore == null)
-            await StoreAppService.LoadStoreAsync("101-1");
+
         if (StoreAppService.FoodItems == null)
             await StoreAppService.GetFoodItemsAsync();
+        if (StoreAppService.PriceLists == null)
+            await StoreAppService.LoadPriceListAsync();
+        if (StoreAppService.OptionSets == null)
+            await StoreAppService.GetOptionSetsAsync();
 
         await LoadActiveMenus();
 
@@ -372,10 +246,13 @@ else
     async Task ViewFoodOptions(FoodItem? foodItem)
     {
         var dic = new Dictionary<string, object>();
+        var dialogOptions = new DialogOptions() { CssClass = "custom-dialog-extra-wide" };
+
+        dic.Add("SelectedMenu", selectedMenu);
         dic.Add("FoodItem", foodItem);
         dic.Add("OnChange", EventCallback.Factory.Create(this, RefreshPage));
-        var dialogOptions = new DialogOptions() { CssClass = "custom-dialog" };
-        await DialogService.OpenAsync<FoodOptions>("Food Options", dic, dialogOptions);
+        var title = StoreAppService.ResolveLanguage(selectedCategory.Names);
+        await DialogService.OpenAsync<FoodOptionsDialog>(title, dic, dialogOptions);
     }
 
     void RefreshPage()
@@ -396,8 +273,14 @@ else
 
     private string ResolveFoodItemPrice(FoodItem foodItem)
     {
-        return "$25.5";
+        if (selectedMenu == null)
+            return "N/A";
+        var priceLists = StoreAppService.GetActivePriceLists(selectedMenu);
+        var price = StoreAppService.GetLowestFoodItemPrice(foodItem, priceLists);
+        return price.ToString("C");
     }
+
+
 
     private void SelectCategory(Category category)
     {
@@ -435,18 +318,29 @@ else
 
     void SearchFoodItems()
     {
+        filteredMenuFoodItems = new List<MenuFoodItem>();
+        if (selectedCategory == null || StoreAppService.FoodItems == null)
+        {
+            return;
+        }
         if (string.IsNullOrEmpty(searchTerm))
         {
-            filteredMenuItems = selectedCategory.FoodItems;
+            filteredMenuFoodItems = StoreAppService.ConvertMenuItemsToMenuFoodItems(selectedCategory.FoodItems);
         }
         else
         {
-            var foodItems = StoreAppService.FoodItems.Where(f => f.Name.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase)).Select(f => f.id).ToList();
-            filteredMenuItems = selectedMenu.Categories.SelectMany(c => c.FoodItems).Where(f => foodItems.Contains(f.FoodItemId)).ToList();
+            var foodItems = StoreAppService.FoodItems?.Where(f => f.Name.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase)).Select(f => f.id).ToList();
+            if (foodItems != null && foodItems.Any())
+            {
+                var menuItems = selectedMenu?.Categories.SelectMany(c => c.FoodItems).Where(f => foodItems.Contains(f.FoodItemId)).ToList();
+                if (menuItems != null && menuItems.Any())
+                    filteredMenuFoodItems = StoreAppService.ConvertMenuItemsToMenuFoodItems(menuItems);
+            }
         }
-
-        StateHasChanged(); // Re-render the component with the new filtered list
+        StateHasChanged();
     }
+
+
 
     void clearSearchText()
     {

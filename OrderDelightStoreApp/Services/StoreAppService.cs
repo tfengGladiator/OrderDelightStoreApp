@@ -1,26 +1,31 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using OrderDelightLibrary.Services;
 using OrderDelightLibrary.Shared.DTOs;
 using OrderDelightLibrary.Shared.Models;
 using OrderDelightLibrary.Shared.Services;
 using OrderDelightLibrary.Shared.Utilities;
-
 namespace OrderDelightStoreApp.Services
 {
     public class StoreAppService
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
+        private readonly SharedService _sharedService;
         private string ImageStorageAccountUrl { get; set; }
         public Store? CurrentStore { get; set; }
         public List<FoodItem>? FoodItems { get; set; }
+        public List<OptionSet>? OptionSets { get; set; }
         public List<Menu>? Menus { get; set; }
-        public StoreAppService(HttpClient httpClient, IConfiguration configuration)
+        public List<PriceList>? PriceLists { get; set; }
+        public List<FloorTable>? FloorTables { get; set; }
+        public StoreAppService(HttpClient httpClient, IConfiguration configuration, SharedService sharedService)
         {
             _httpClient = httpClient;
             _configuration = configuration;
+            _sharedService = sharedService;
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("x-functions-key", "ZpMsN3Kwz5S2sj4PqvYDxDVW7YLgf6PCf7Kyg65BxjR6AzFueD6r5g=="); //temporarily used, change to Oauth later
             AddCurrentUserAndStoreHeaders("101-1", "757a7d94-473b-40ca-bc2f-b127333c1536");
@@ -97,6 +102,12 @@ namespace OrderDelightStoreApp.Services
         }
 
         #endregion
+
+        public async Task LoadFloorTables()
+        {
+            var requestUrl = "api/store/floor";
+            FloorTables = await GetAsync<List<FloorTable>>(requestUrl);
+        }
         //public async Task<List<Menu>> GetActiveMenusAsync()
         //{
         //    var url = $"/products";
@@ -265,10 +276,18 @@ namespace OrderDelightStoreApp.Services
             var requestUrl = "api/store/menus?storeId=" + CurrentStore.StoreId;
             return await GetAsync<List<Menu>>(requestUrl);
         }
+        public async Task UpdateFoodItemStatusAsync(FoodItemStatusIn foodItemStatusIn)
+        {
+            var requestUrl = "api/store/food-item/status";
 
+            var ret = await PutAsync(requestUrl, foodItemStatusIn);
+            if (ret)
+            {
+                await GetFoodItemsAsync();
+            }
+        }
         public async Task<List<FoodItem>?> GetFoodItemsAsync()
         {
-
             var requestUrl = "api/store/food-items";
             var responseString = await _httpClient.GetStringAsync(requestUrl);
             var options = new JsonSerializerOptions
@@ -276,9 +295,190 @@ namespace OrderDelightStoreApp.Services
                 PropertyNameCaseInsensitive = true
             };
             FoodItems = JsonSerializer.Deserialize<List<FoodItem>>(responseString, options);
-            return FoodItems;
+            return FoodItems ?? new List<FoodItem>();
+        }
+        public async Task<List<OptionSet>?> GetOptionSetsAsync()
+        {
+
+            var requestUrl = "api/store/optionsets";
+            var responseString = await _httpClient.GetStringAsync(requestUrl);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            OptionSets = JsonSerializer.Deserialize<List<OptionSet>>(responseString, options);
+            OptionSets = OptionSets ?? new List<OptionSet>();
+            return OptionSets;
+        }
+        public async Task LoadPriceListAsync()
+        {
+            var requestUrl = "api/store/price-lists";
+            PriceLists = await GetAsync<List<PriceList>>(requestUrl);
         }
 
+        public List<PriceList> GetActivePriceLists(Menu menu)
+        {
+            var filteredPriceLists = PriceLists?.Where(p => p.IsEnabled && !p.IsDeleted && p.AppliedMenus.Contains(menu.id)).ToList();
+            if (filteredPriceLists == null || !filteredPriceLists.Any()) return new List<PriceList>();
+            filteredPriceLists = filteredPriceLists.Where(p => ResolveStatus(p) == "Active").ToList();
+            return filteredPriceLists;
+        }
+
+        public string ResolveStatus(PriceList priceList)
+        {
+            var priceListStartDateLocal = GetStoreLocalTime(priceList.StartDate);
+            var priceListEndDateLocal = GetStoreLocalTime(priceList.EndDate);
+            var now = GetStoreNow();
+
+            var message = "";
+            if (priceListStartDateLocal.Date > now.Date)
+                message = "Upcoming";
+            else if (priceListEndDateLocal.Date < now.Date)
+                message = "Expired";
+            else
+                message = priceList.IsEnabled ? "Active" : "Current";
+
+            return message;
+        }
+
+        public decimal GetLowestFoodItemPrice(FoodItem foodItem, List<PriceList>? priceLists)
+        {
+            // Start with the base price of the food item as the default highest possible price
+            decimal lowestPrice = foodItem.Price;
+
+            // Only proceed if there are any price lists
+            if (priceLists != null && priceLists.Any())
+            {
+                // Iterate through each price list
+                foreach (var priceList in priceLists)
+                {
+                    // Ensure the price list is active and not deleted
+                    if (priceList.IsEnabled && !priceList.IsDeleted &&
+                        (!priceList.StartDate.HasValue || priceList.StartDate <= DateTime.Now) &&
+                        (!priceList.EndDate.HasValue || priceList.EndDate >= DateTime.Now))
+                    {
+                        // Look for the food item in this price list's items
+                        foreach (var item in priceList.PriceListItems)
+                        {
+                            if (item.FoodItem.id == foodItem.id)
+                            {
+                                // Update the lowest price if a cheaper one is found
+                                if (item.Price < lowestPrice)
+                                {
+                                    lowestPrice = item.Price;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Return the lowest price found, or the item's base price if not found in any price lists
+            return lowestPrice;
+        }
+
+
+        public List<MenuFoodItem> ConvertMenuItemsToMenuFoodItems(List<OrderDelightLibrary.Shared.Models.MenuItem> menuItems)
+        {
+            var result = new List<MenuFoodItem>();
+            foreach (var menuItem in menuItems)
+            {
+                // Find the corresponding FoodItem
+                var foodItem = FoodItems?.FirstOrDefault(f => f.id == menuItem.FoodItemId);
+                if (foodItem == null)
+                    continue; // Skip this iteration if no FoodItem is found
+
+                // Create a new MenuItemForUI object and map properties
+                var menuFoodItem = new MenuFoodItem
+                {
+                    FoodItem = foodItem,
+                    IsChefsChoice = menuItem.IsChefsChoice,
+                    DisplayOrder = menuItem.DisplayOrder
+                };
+
+                // Add the newly created MenuItemForUI to the result list
+                result.Add(menuFoodItem);
+            }
+            return result.OrderBy(m => m.FoodItem.Code).ToList();
+        }
+
+        public List<OrderDelightLibrary.Shared.Models.OptionSetSelection> GetOptionSelections(FoodItem foodItem)
+        {
+            return _sharedService.CleanupOptionSets(foodItem.OptionSets, OptionSets);
+        }
+        public List<OrderDelightLibrary.Shared.Models.GroupSelection> GetGroupSelections(FoodItem foodItem)
+        {
+            return _sharedService.CleanupGroupSelections(foodItem.GroupSelections, FoodItems);
+        }
+
+        public string ResolveOptionSetName(string osId)
+        {
+            var optionSet = OptionSets?.FirstOrDefault(os => os.id == osId);
+            return optionSet == null ? "" : ResolveLanguage(optionSet.Names);
+        }
+
+        public string? ResolveOptionName(string optionId)
+        {
+            return OptionSets?.SelectMany(os => os.OptionItems)
+                .Where(o => o.OptionId == optionId)
+                .Select(o => o.Name)
+                .FirstOrDefault();
+        }
+
+        public string ResolveOptions(List<OptionItem> optionItems)
+        {
+            var sb = new StringBuilder();
+            foreach (var optionItem in optionItems)
+            {
+                sb.Append($"{ResolveLanguage(optionItem.Names)}, ");
+            }
+            return sb.ToString().TrimEnd(", ".ToCharArray());
+        }
+        #region time zone related
+
+        public DateTime GetStoreLocalTime(DateTime? utcTime)
+        {
+            if (CurrentStore == null) return DateTime.UtcNow;
+            return CommonUtilities.ConvertToLocalTime(utcTime ?? DateTime.UtcNow, CurrentStore.TimeZoneId);
+        }
+        public DateTime ConvertStoreLocalTimeToUtc(DateTime localtime)
+        {
+            var timeZoneId = (CurrentStore == null || CurrentStore?.TimeZoneId == null) ? "America/Toronto" : CurrentStore.TimeZoneId;
+            return CommonUtilities.ConvertToUtcTime(localtime, timeZoneId);
+        }
+
+        public DateTime GetStoreNow()
+        {
+            return GetStoreLocalTime(DateTime.UtcNow);
+        }
+
+        public async Task<List<ShoppingCart>> GetShoppingCartsAsync(string tableId)
+        {
+            var requestUrl = $"api/store/shopping-cart/table/{tableId}";
+            var responseString = await _httpClient.GetStringAsync(requestUrl);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            if (string.IsNullOrWhiteSpace(responseString))
+                return null;
+            var shoppingCartItems = JsonSerializer.Deserialize<List<ShoppingCart>>(responseString, options);
+            return shoppingCartItems ?? new List<ShoppingCart>();
+        }
+        public async Task<TableStatus?> GetTableStatusAsync(string tableId)
+        {
+            var requestUrl = $"api/store/table-status/{tableId}";
+            var responseString = await _httpClient.GetStringAsync(requestUrl);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            if (string.IsNullOrWhiteSpace(responseString))
+                return null;
+            var tableStatus = JsonSerializer.Deserialize<TableStatus?>(responseString, options);
+            return tableStatus;
+        }
+        #endregion
         //public async Task<List<Order>> GetOrdersAsync()
         //{
         //    var response = await _httpClient.GetAsync($"{_configuration["ApiUrl"]}/orders");

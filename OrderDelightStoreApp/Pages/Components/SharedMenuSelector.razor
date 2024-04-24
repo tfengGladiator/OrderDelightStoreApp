@@ -1,0 +1,15 @@
+﻿@* <ul style="list-style-type: none; padding: 0; display: flex; background-color: #f7f6f6; margin-bottom: 0px; overflow-x: auto;">
+    @foreach (var menu in MenuList)
+    {
+        <li style="@($"cursor: pointer; padding: 10px 20px 15px 20px; min-width:200px; max-width:300px; border-bottom: {(menu.id == selectedMenu.id ? "3px solid orange" : "none")}; text-align: center; margin:0 10px 0 10px;")"
+            @onclick="@(() => SelectMenu(menu.id))">
+            <div class="menu-item-name">@(StoreAppService.ResolveLanguage(menu.Names))</div>
+        </li>
+    }
+</ul>
+
+@code {
+
+    [Parameter] public string SelectedId { get; set; }
+}
+ *@

@@ -43,10 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Components\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\OrderDelightLibrary\OrderDelightLibrary.csproj" />
   </ItemGroup>
 

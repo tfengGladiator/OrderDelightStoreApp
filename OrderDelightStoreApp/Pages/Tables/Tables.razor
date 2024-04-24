@@ -1,1 +1,182 @@
-﻿@page "/tables"  
+﻿@page "/tables"
+@inject StoreAppService StoreAppService
+@if (StoreAppService.FloorTables == null || selectedFloor == null)
+{
+    <div class="alert alert-danger" role="alert">
+        Tables have not setup yet.
+    </div>
+}
+else
+{
+    <div class="menu-container">
+        <RadzenRow>
+            <RadzenColumn Size="12">
+                <ul style="list-style-type: none; padding: 0; display: flex; background-color: #f7f6f6; margin-bottom: 0px; overflow-x: auto;">
+                    @foreach (var floor in StoreAppService.FloorTables)
+                    {
+                        <li style="@($"cursor: pointer; padding: 10px 20px 15px 20px; min-width:200px; max-width:300px; border-bottom: {(floor.id == selectedFloor.id ? "3px solid orange" : "none")}; text-align: center; margin:0 10px 0 10px;")"
+                            @onclick="@(() => SelectFloor(floor.id))">
+                            <div class="menu-item-name">@floor.FloorName</div>
+                        </li>
+                    }
+                </ul>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn Size="12">
+                <div class="rz-p-3">
+                    <RadzenCard class="table-container">
+                        @if (selectedFloor.Tables == null || !selectedFloor.Tables.Any())
+                        {
+                            <span>Tables have not been setup yet</span>
+                        }
+                        @foreach (var table in selectedFloor.Tables)
+                        {
+                            <div class="table-card">
+                                <a href="/tables/shoppingcart/@table.TableId">
+                                    <div class="table-title ordered">
+                                        <div class="table-name">@table.TableName</div>
+                                        <div class="table-count">5/@table.Max</div>
+                                    </div>
+                                    <div class="table-info">
+                                        <div class="amount">$115</div>
+                                        <div class="time-duration">
+                                            <div class="time">11:28</div>
+                                            <div class="duration">20m</div>
+                                        </div>
+                                    </div>
+                                    <div class="table-bottom available"></div>
+                                </a>
+                            </div>
+                        }
+                    </RadzenCard>
+                </div>
+            </RadzenColumn>
+        </RadzenRow>
+    </div>
+}
+<style>
+    .table-container {
+        display: flex;
+        flex-wrap: wrap; /* This allows the cards to wrap to the next line */
+        gap: 25px; /* This adds space between the cards */
+        justify-content: flex-start; /* This aligns cards to the start of the container */
+        padding-left: 50px; /* This adds space to the left of the container */
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        font-size: 0.9em;
+        overflow: hidden;
+        width: 140px; /* Adjust this width as needed */
+        display: flex;
+        flex-direction: column;
+        /* Removing margin auto if you want cards to flow one after another */
+    }
+
+    .table-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background-color: #fe8e01;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2em;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .table-info {
+        height: 120px;
+        width: 140px;
+        padding: 10px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Distributes space between items */
+        text-align: center; /* Center text alignment for all child elements */
+        background: #FFF0D8
+    }
+
+    .amount {
+        color: black;
+        font-weight: bold;
+        font-size: 1.5em; /* Increased font-size for the amount */
+        margin: 10px 0; /* Space above and below the amount */
+    }
+
+    .time-duration {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+    }
+
+    .time,
+    .duration {
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    /*  .time {
+            background-color: #ffebcd;
+        }
+
+        .duration {
+            background-color: #ffd700;
+        } */
+
+    .table-bottom {
+        height: 15px;
+        background-color: #32cd32; /* Adjust to match the exact 'available' color */
+    }
+
+    /* Adjusted styles for the table name and order count */
+    .table-name,
+    .table-count {
+        text-align: center;
+    }
+
+    .table-count {
+        color: black;
+    }
+    /* Additional padding-bottom for .table-info to ensure space for time and duration */
+    .table-info {
+        position: relative; /* Needed for absolute positioning of children */
+        padding-bottom: 35px; /* Padding to ensure space  */
+    }
+
+    .table-container a { /* This targets the a tags within the .table-container */
+        text-decoration: none; /* This removes the underline from the link */
+        color: inherit; /* This will make the link use the inherited text color */
+    }
+
+        .table-container a:hover { /* This targets the a tags within the .table-container when hovered */
+            text-decoration: none; /* This ensures that the underline does not appear on hover */
+        }
+
+</style>
+@code
+{
+    private FloorTable selectedFloor { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (StoreAppService.FloorTables == null)
+            await StoreAppService.LoadFloorTables();
+
+        selectedFloor = StoreAppService.FloorTables?.FirstOrDefault();
+    }
+
+    private void SelectFloor(string floorId)
+    {
+        selectedFloor = StoreAppService.FloorTables.FirstOrDefault(x => x.id == floorId);
+    }
+
+
+}

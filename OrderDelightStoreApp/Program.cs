@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.DependencyInjection;
+using OrderDelightLibrary.Shared.Services;
 using OrderDelightStoreApp;
 using OrderDelightStoreApp.Services;
 
@@ -18,7 +18,6 @@ builder.Services.AddScoped<Radzen.ContextMenuService>();
 
 
 
-
 var isAzureHosted = Environment.GetEnvironmentVariable("IS_AZURE_HOSTED") == "true";
 var useRemote = true;
 // Register HttpClient for dependency injection
@@ -29,9 +28,10 @@ if (isAzureHosted || useRemote)
     baseAddress = "https://orderly-list-store.azurewebsites.net/"; //builder.Configuration["api-url"];  
 }
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseAddress) });
+builder.Services.AddScoped<SharedService>();
 
 // Register your StoreAppService with a factory delegate to inject HttpClient and configuration settings
-builder.Services.AddScoped<StoreAppService>(sp => new StoreAppService(sp.GetRequiredService<HttpClient>(), builder.Configuration));
+builder.Services.AddScoped<StoreAppService>(sp => new StoreAppService(sp.GetRequiredService<HttpClient>(), builder.Configuration, new SharedService()));
 
 await builder.Build().RunAsync();
 
