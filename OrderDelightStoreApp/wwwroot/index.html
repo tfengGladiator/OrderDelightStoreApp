@@ -19,6 +19,23 @@
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
     <script type="text/javascript">
         // Immediate JavaScript functions here
+
+
+        //function printHello() {
+        //    // Create a hidden iframe
+        //    var iframe = document.createElement('iframe');
+        //    iframe.style.visibility = "hidden";
+        //    document.body.appendChild(iframe);
+
+        //    // Set the content of the iframe
+        //    iframe.contentDocument.body.innerHTML = document.getElementById("printArea").innerHTML;
+
+        //    // Trigger print and then remove the iframe
+        //    iframe.contentWindow.focus(); // Required for IE
+        //    iframe.contentWindow.print();
+        //    document.body.removeChild(iframe);
+        //}
+
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -47,6 +64,9 @@
         function deleteCookie(name) {
             document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
         }
+
+     
+
     </script>
 </head>
 
@@ -97,8 +117,26 @@
             }
         }
 
+        window.onload = function () {
+            setupScrollArrows();
+        };
 
-      
+       function setupScrollArrows() {
+    document.querySelectorAll('.food-list-container').forEach(container => {
+        const upArrow = container.previousElementSibling;
+        const downArrow = container.nextElementSibling;
+        const checkArrows = () => {
+            const isTopVisible = container.scrollTop > 0;
+            const isBottomVisible = container.scrollHeight > container.scrollTop + container.clientHeight;
+            upArrow.style.display = isTopVisible ? 'block' : 'none';
+            downArrow.style.display = isBottomVisible ? 'block' : 'none';
+        };
+        container.addEventListener('scroll', checkArrows);
+        checkArrows();  // Check on initial load
+    });
+}
+
+
     </script>
 
 </body>

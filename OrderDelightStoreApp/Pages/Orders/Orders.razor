@@ -1,6 +1,33 @@
-﻿@page "/orders"
+﻿@* @page "/orders" *@
 @inject NavigationManager NavManager
-Orders Page
+<RadzenRow>
+    <RadzenColumn Size="3">
+        <RadzenText Text="New Order Items (10)"></RadzenText>
+        <div class="food-list-container">
+            <ul class="food-list">
+              @*   @foreach (var menuItem in filteredMenuFoodItems)
+                {
+                    <li class="food-item" @onclick="@(async () => await ViewFoodOptions(menuItem.FoodItem))">
+                        <img src="@ResolveImagePath(menuItem.FoodItem)" onerror="imageError(this)" class="food-image">
+                        <span class="food-price">@ResolveFoodItemPrice(menuItem.FoodItem)</span>
+                        <div class="food-info">
+                            <span class="food-name">@ResolveFoodItemName(menuItem.FoodItem)</span>
+                        </div>
+                    </li>
+                } *@
+            </ul>
+        </div>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+
+    </RadzenColumn>
+</RadzenRow>
 
 @code {
     public async Task OnInitializedAsync()

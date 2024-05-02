@@ -452,6 +452,20 @@ namespace OrderDelightStoreApp.Services
             return GetStoreLocalTime(DateTime.UtcNow);
         }
 
+        public async Task<List<FoodItemSelected>> GetFoodItemsSelectedAsync()
+        {
+            var requestUrl = "api/store/shopping-cart/food-items-for-kitchen";
+            var responseString = await _httpClient.GetStringAsync(requestUrl);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            if (string.IsNullOrWhiteSpace(responseString))
+                return new List<FoodItemSelected>();
+            var foodItemsSelected = JsonSerializer.Deserialize<List<FoodItemSelected>>(responseString, options);
+            return foodItemsSelected ?? new List<FoodItemSelected>();
+        }
+
         public async Task<List<ShoppingCart>> GetShoppingCartsAsync(string tableId)
         {
             var requestUrl = $"api/store/shopping-cart/table/{tableId}";

@@ -192,6 +192,8 @@ code {
     --rz-tabs-tab-selected-top-border-color: #ffab40 !important;
     --rz-tabs-tab-hover-color: #ffab40 !important;
     --rz-tabs-tab-selected-color: #ffab40 !important;
+    --rz-selectbar-selected-background-color: #fe8e01 !important;
+    --rz-primary: #fe8e01 !important;
 }
 
 .rz-tabview-title{
@@ -286,14 +288,14 @@ code {
 
 
 
-.food-list-container {
-    height: 60vh; /* Set to a fixed height or based on viewport (vh) */
-    overflow-y: scroll; /* Only vertical scrolling */
-    flex-grow: 4;
+/*.food-list-container {
+    height: 60vh;*/ /* Set to a fixed height or based on viewport (vh) */
+    /*overflow-y: scroll;*/ /* Only vertical scrolling */
+    /*flex-grow: 4;
     width: 80%;
     padding-left: 20px;
     padding-top: 10px;
-}
+}*/
 
 /* Previous styles ... */
 .food-list {

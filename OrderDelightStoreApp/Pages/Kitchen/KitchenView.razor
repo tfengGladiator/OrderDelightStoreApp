@@ -1,0 +1,205 @@
+﻿@page "/kitchenView"
+@page "/orders"
+@inject NavigationManager NavManager
+@inject StoreAppService StoreAppService
+@using Microsoft.AspNetCore.Components.Web
+@inject IJSRuntime JSRuntime
+<RadzenCard Class="rz-3 card-full-height">
+    <RadzenRow Gap="0" RowGap="0" Style="border: 1px lightgray solid">
+        @foreach (var status in new string[] { "New", "WorkInProgress", "Ready", "Served" })
+        {
+            <RadzenColumn Size="3" Style="position: relative;">  <!-- Ensure position relative here -->
+                <div class="centered-text" style="padding:15px; background-color: #EBEBEB;">
+                    <RadzenText Text="@ResolveStatusDescription(status)" Style="color:black; font-size:larger; font-weight:bold;"></RadzenText>
+                </div>
+                <div class="scroll-arrow up-arrow" style="display: none;">↑</div>  <!-- Use display: none for initial state -->
+                <div class="food-list-container centered-content"
+                     @ondragover:preventDefault
+                     @ondrop="@(e => DropItem(e, status))"
+                     @ondragleave="@(e => Console.WriteLine($"Leaving {status} area"))">
+                    <ul class="food-list">
+                        @foreach (var foodItemSelected in GetFoodItemsSelected(status))
+                        {
+                            <li draggable="true"
+                                @ondragstart="@(e => DragStart(e, foodItemSelected))"
+                                class="food-item">
+                                <img src="@ResolveImagePath(foodItemSelected.FoodItem)" onerror="imageError(this)" class="food-image">
+                                <span class="food-price">@ResolveFoodItemPrice(foodItemSelected)</span>
+                                <div class="food-info">
+                                    <span class="food-name">@ResolveFoodItemName(foodItemSelected)</span>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="scroll-arrow down-arrow" style="display: none;">↓</div>
+            </RadzenColumn>
+        }
+    </RadzenRow>
+</RadzenCard>
+
+<style>
+    .centered-text {
+        text-align: center;
+        width: 100%;
+        padding-bottom: 40px;
+        // Add padding to push the up arrow down
+    }
+
+
+    .card-full-height {
+        height: 100%; /* Ensures the card fills the height it's allowed */
+        min-height: 100vh; /* Ensures the card fills the viewport height */
+        display: flex;
+        flex-direction: column;
+    }
+
+
+    .centered-content {
+        display: flex;
+        justify-content: center; /* Horizontally center the content */
+        align-items: top; /* Incorrect if meant to center vertically; use 'flex-start' for aligning to the top */
+        text-align: center;
+        width: 100%; /* Ensures full width */
+        height: 100%; /* Full height for vertical centering */
+    }
+
+
+    .food-list-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* Aligns content to the top */
+        align-items: center; /* Keeps items centered horizontally */
+        width: 100%; /* Ensure it takes full width */
+        height: 100%; /* Stretch to fill container height */
+        max-height: 600px; /* Maximum height before scrolling starts */
+        overflow-y: auto; /* Enables vertical scrolling */
+    }
+
+    .scroll-arrow {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        cursor: pointer;
+        font-size: 24px;
+        // Visible size color: #666;
+        z-index: 1000;
+        // Ensure it's on top
+    }
+
+    .up-arrow {
+        top: -30px;
+        // Move the arrow up outside the container
+    }
+
+    .down-arrow {
+        bottom: -30px;
+        // Move the arrow down outside the container
+    }
+
+
+
+
+
+</style>
+@code {
+    public List<FoodItemSelected> AllShoppingCartFoodItems { get; set; } = new List<FoodItemSelected>();
+    FoodItemSelected _draggingItem;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("Invoking JS for setupScrollArrows...");
+            await JSRuntime.InvokeVoidAsync("setupScrollArrows");
+        }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllShoppingCartFoodItems = await StoreAppService.GetFoodItemsSelectedAsync();
+    }
+
+    string ResolveImagePath(FoodItem foodItem)
+    {
+        return StoreAppService.GetFoodItemImageUrl(foodItem);
+    }
+
+    Task ViewDetails(FoodItemSelected foodItemSelected)
+    {
+        return Task.Delay(0);
+    }
+
+    string ResolveFoodItemPrice(FoodItemSelected foodItemSelected)
+    {
+        return "123";
+    }
+    string ResolveFoodItemName(FoodItemSelected foodItemSelected)
+    {
+        return "food";
+    }
+
+    string ResolveStatusDescription(string status)
+    {
+        var foodItems = GetFoodItemsSelected(status);
+        var count = foodItems.Count;
+        return status switch
+        {
+            "New" => $"New Order Items ({count})",
+            "WorkInProgress" => $"Work In Progress ({count})",
+            "Ready" => $"Ready ({count})",
+            "Served" => $"Served ({count})",
+            "Cancelled" => $"Cancelled ({count})",
+            _ => "Unknown"
+        };
+    }
+
+    List<FoodItemSelected> GetFoodItemsSelected(string status)
+    {
+        if (status == "New")
+        {
+            return AllShoppingCartFoodItems.Where(f => f.Status == "Open" || f.Status == "New" || string.IsNullOrWhiteSpace(f.Status)).ToList();
+        }
+        else if (status == "WorkInProgress")
+        {
+            return AllShoppingCartFoodItems.Where(f => f.Status == "WorkInProgress").ToList();
+        }
+        else if (status == "Ready")
+        {
+            return AllShoppingCartFoodItems.Where(f => f.Status == "Ready").ToList();
+        }
+        else if (status == "Served")
+        {
+            return AllShoppingCartFoodItems.Where(f => f.Status == "Served").ToList();
+        }
+        else if (status == "Cancelled")
+        {
+            return AllShoppingCartFoodItems.Where(f => f.Status == "Cancelled").ToList();
+        }
+        return new List<FoodItemSelected>();
+    }
+
+    void DragStart(DragEventArgs e, FoodItemSelected item)
+    {
+        _draggingItem = item;  // Store the item reference when dragging starts
+        Console.WriteLine($"Started dragging: {item.FoodItem.Name}");
+    }
+
+    void DropItem(DragEventArgs e, string newStatus)
+    {
+        Console.WriteLine($"Attempting to drop to {newStatus}");  // Check if this logs
+        if (_draggingItem != null)
+        {
+            Console.WriteLine($"Dropped item {_draggingItem.FoodItem.Name} to {newStatus}");
+            _draggingItem.Status = newStatus;
+            _draggingItem = null;
+            StateHasChanged();  // Ensure the UI updates.
+        }
+        else
+        {
+            Console.WriteLine("No item was being dragged.");  // This checks if the item reference was lost.
+        }
+    }
+
+}

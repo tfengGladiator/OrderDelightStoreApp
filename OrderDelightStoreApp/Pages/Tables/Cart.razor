@@ -25,7 +25,7 @@ else
                     </div>
                 </RadzenRow>
 
-                <hr/>
+                <hr />
 
                 <RadzenRow>
                     <div style="display: flex; justify-content: space-between; width: 100%;">
@@ -37,7 +37,7 @@ else
                         </div>
                     </div>
                 </RadzenRow>
-                <hr/>
+                <hr />
 
                 <RadzenRow>
                     <div style="display: flex; justify-content: space-between; width: 100%;">
@@ -49,7 +49,7 @@ else
                         </div>
                     </div>
                 </RadzenRow>
-                <hr/>
+                <hr />
 
                 <RadzenRow Class="rz-py-3">
                     <RadzenColumn Size="12" SizeMD="12" Class="text-left">
@@ -58,7 +58,7 @@ else
                 </RadzenRow>
                 <RadzenRow>
                     <RadzenColumn Size="12" SizeMD="12" Class="d-flex justify-content-center">
-                        <img src="images/QR.jpg" style="width:300px;"/>
+                        <img src="images/QR.jpg" style="width:300px;" />
                     </RadzenColumn>
                 </RadzenRow>
                 <RadzenRow Class="rz-py-3">
@@ -77,14 +77,41 @@ else
             </RadzenCard>
         </RadzenColumn>
         <RadzenColumn Size="12" SizeMD="7">
-            <RadzenDataGrid TItem="FoodItemSelected" Data="@lastShoppingCart?.Rounds[0].FoodItemsSelected" AllowPaging="true" PageSize="5">
-                <Columns>
-                    <RadzenDataGridColumn TItem="ShoppingCart" Property="ItemName" Title="Item Name" />
-                    <RadzenDataGridColumn TItem="ShoppingCart" Property="Quantity" Title="Quantity" />
-                    <RadzenDataGridColumn TItem="ShoppingCart" Property="Price" Title="Price" />
-                    <RadzenDataGridColumn TItem="ShoppingCart" Property="Total" Title="Total" />
-                </Columns>
-            </RadzenDataGrid>
+            @if (lastShoppingCart != null)
+            {
+                @if (lastShoppingCart?.Rounds.Count > 0)
+                {
+                    foreach (var round in lastShoppingCart?.Rounds.OrderBy(r => r.RoundNumber))
+                    {
+                        var foodItemsSelected = lastShoppingCart?.FoodItemsSelected.Where(f => f.RoundNumber == round.RoundNumber);
+                        <RadzenDataGrid TItem="FoodItemSelected" Data="@foodItemsSelected" AllowPaging="true" PageSize="5">
+                            <Columns>
+                                <RadzenDataGridColumn TItem="FoodItemSelected" Title="Food Name">
+                                    <Template Context="foodItemSelected">
+                                        @foodItemSelected.FoodItem.Code - @foodItemSelected.FoodItem.Name
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="FoodItemSelected" Title="Unit Price">
+                                    <Template Context="foodItemSelected">
+                                        @foodItemSelected.SubTotalPrice.ToString("C2")
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                @*    <RadzenDataGridColumn TItem="FoodItemSelected" Title="Quantity">
+                <Template Context="foodItemSelected">
+                @foodItemSelected.Quantity
+                </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="FoodItemSelected" Title="Total">
+                <Template Context="foodItemSelected">
+                @(foodItemSelected.Price * foodItemSelected.Quantity).ToString("C2")
+                </Template>
+                </RadzenDataGridColumn>*@
+                            </Columns>
+                        </RadzenDataGrid>
+                    }
+                }
+            }
+
         </RadzenColumn>
     </RadzenRow>
 }
@@ -109,5 +136,5 @@ else
         tableStatus = await StoreAppService.GetTableStatusAsync(tableId);
     }
 
-   
+
 }

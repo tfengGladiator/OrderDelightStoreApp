@@ -63,20 +63,27 @@ else
                     @foreach (var menuItem in filteredMenuFoodItems)
                     {
                         <li class="food-item" @onclick="@(async () => await ViewFoodOptions(menuItem.FoodItem))">
-                         @*    <a href="JavaScript:void(0)" > *@
-                                <img src="@ResolveImagePath(menuItem.FoodItem)" onerror="imageError(this)" class="food-image">
-                                <span class="food-price">@ResolveFoodItemPrice(menuItem.FoodItem)</span>
-                                <div class="food-info">
-                                    <span class="food-name">@ResolveFoodItemName(menuItem.FoodItem)</span>
-                                </div>
-                        @*     </a> *@
+                            <img src="@ResolveImagePath(menuItem.FoodItem)" onerror="imageError(this)" class="food-image">
+                            <span class="food-price">@ResolveFoodItemPrice(menuItem.FoodItem)</span>
+                            <div class="food-info">
+                                <span class="food-name">@ResolveFoodItemName(menuItem.FoodItem)</span>
+                            </div>
                         </li>
                     }
                 </ul>
             </div>
         </div>
     </div>
+
+
+  @*   <!-- Hidden area for printing -->
+    <div id="printArea" style="display:none;">
+        Hello
+    </div>
+
+    <button @onclick="PrintHello">Print Hello</button> *@
 }
+
 
 <style>
 
@@ -329,7 +336,9 @@ else
         }
         else
         {
-            var foodItems = StoreAppService.FoodItems?.Where(f => f.Name.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase)).Select(f => f.id).ToList();
+            var foodItems = StoreAppService.FoodItems?.
+                Where(f => f.Name.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase)
+                || f.Code.Contains(searchTerm, StringComparison.CurrentCultureIgnoreCase)).Select(f => f.id).ToList();
             if (foodItems != null && foodItems.Any())
             {
                 var menuItems = selectedMenu?.Categories.SelectMany(c => c.FoodItems).Where(f => foodItems.Contains(f.FoodItemId)).ToList();
@@ -346,5 +355,11 @@ else
     {
         searchTerm = "";
         SearchFoodItems();
+    }
+
+    private void PrintHello()
+    {
+        var js = (IJSInProcessRuntime)JSRuntime;
+        js.InvokeVoid("printHello");
     }
 }

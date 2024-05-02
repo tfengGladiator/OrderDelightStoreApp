@@ -1,7 +1,7 @@
 ﻿self.assetsManifest = {
   "assets": [
     {
-      "hash": "sha256-kPUV+9+3u04CCQdb5ZnQXRcvIyaIGl6vLUVXvKi0+68=",
+      "hash": "sha256-Nmaz7qA6da1q9YLzXHyC1+O5\/uDhORHrgCg89pXF3iE=",
       "url": "css\/app.css"
     },
     {
@@ -105,7 +105,11 @@
       "url": "images\/profile.jpg"
     },
     {
-      "hash": "sha256-MohzS3vNzDEra3fmBrhF3uDg3+aO3esaDINLb7zvQxc=",
+      "hash": "sha256-Nz9rewNwK+G0\/IAp+ktGvoPyg7NsacaGgvhOLKbhtbc=",
+      "url": "images\/QR.jpg"
+    },
+    {
+      "hash": "sha256-J\/YEMkSkh3GbLKZXKYSozC0r2AfOxoUZJIzOhvkf6D4=",
       "url": "index.html"
     },
     {
@@ -1125,31 +1129,31 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-k7JDf5e0\/qXr3MdKZzGXwa9FwEnHvU4JfS1O7A1S1xs=",
+      "hash": "sha256-94toTuupPUueN4pzzYCDY6YHs1RTmIE\/ceyQJo\/JhLU=",
       "url": "_framework\/OrderDelightLibrary.wasm"
     },
     {
-      "hash": "sha256-KAYZGCKYRIH7f5HQPbjJ6Gz5wQA2HOzQQHF0c8CvLWg=",
+      "hash": "sha256-\/13YAdmQ8JJOzWQHzlqMTUBqn04qM+X2bY8\/po3LqJg=",
       "url": "_framework\/OrderDelightLibrary.Shared.wasm"
     },
     {
-      "hash": "sha256-oVRlEUoSp5EiYmP0KxWCbcEzR+KHfPN\/nYccmK2DswA=",
+      "hash": "sha256-REpOIsBmGnvOQNkJPOXhOoqBqIh6JMXbtRwMYZ+oagQ=",
       "url": "_framework\/OrderDelightLibrary.pdb"
     },
     {
-      "hash": "sha256-F04RPZKNJCNxYkS7iF67T2dMLfRNNfAtdI9VKMDLOug=",
+      "hash": "sha256-FThbOYDGJPZUihsHKt+hNG0CLKQGZ9+XyTh6s\/fRuyY=",
       "url": "_framework\/OrderDelightLibrary.Shared.pdb"
     },
     {
-      "hash": "sha256-uWS9IVX7OPIth2HDB4i+LZDj0VvyBeSjH6Br67Yy7YE=",
+      "hash": "sha256-X5ZnjK7MtArCgpEop5gyFpXtBe54BmPVnDGRrck+KGg=",
       "url": "_framework\/OrderDelightStoreApp.wasm"
     },
     {
-      "hash": "sha256-emvo\/7aP\/CEweZkElCAQ4v2Pv\/bkDq5zOPTJ9mQpFgc=",
+      "hash": "sha256-veBx6KJlXDan9i6ncPGBwTmgpQXRwi8x97iR9I3gIuA=",
       "url": "_framework\/OrderDelightStoreApp.pdb"
     },
     {
-      "hash": "sha256-vVAYdF4Pn9Y+xQQgGYAhVliAeZNfLhLIAjrupNC3KLo=",
+      "hash": "sha256-682zN7y\/C65SbX5BqaPNcbvjLR6oKSOwRZrtX9RWczY=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -1349,5 +1353,5 @@
       "url": "_content\/Radzen.Blazor\/Radzen.Blazor.js"
     }
   ],
-  "version": "rU7a0+K\/"
+  "version": "RV6zQzJ\/"
 };
