@@ -12,7 +12,7 @@
                 <div class="centered-text" style="padding:15px; background-color: #EBEBEB;">
                     <RadzenText Text="@ResolveStatusDescription(status)" Style="color:black; font-size:larger; font-weight:bold;"></RadzenText>
                 </div>
-                <div class="scroll-arrow up-arrow" style="display: none;">↑</div>  <!-- Use display: none for initial state -->
+                <div class="scroll-arrow up-arrow" style="display: none;"><img src="/images/up-arrow.png" /></div>  <!-- Use display: none for initial state -->
                 <div class="food-list-container centered-content"
                      @ondragover:preventDefault
                      @ondrop="@(e => DropItem(e, status))"
@@ -32,7 +32,7 @@
                         }
                     </ul>
                 </div>
-                <div class="scroll-arrow down-arrow" style="display: none;">↓</div>
+                <div class="scroll-arrow down-arrow" style="display: none;"><img src="/images/down-arrow.png" /></div>
             </RadzenColumn>
         }
     </RadzenRow>
@@ -61,7 +61,7 @@
         align-items: top; /* Incorrect if meant to center vertically; use 'flex-start' for aligning to the top */
         text-align: center;
         width: 100%; /* Ensures full width */
-        height: 100%; /* Full height for vertical centering */
+        /*  height: 100%; Full height for vertical centering */
     }
 
 
@@ -77,23 +77,22 @@
     }
 
     .scroll-arrow {
-        position: absolute;
+        @* position: absolute; *@
         width: 100%;
         text-align: center;
         cursor: pointer;
         font-size: 24px;
         // Visible size color: #666;
-        z-index: 1000;
-        // Ensure it's on top
+        z-index: 1000; // Ensure it's on top
     }
 
     .up-arrow {
-        top: -30px;
+       // top: -30px;
         // Move the arrow up outside the container
     }
 
     .down-arrow {
-        bottom: -30px;
+      //  bottom: -30px;
         // Move the arrow down outside the container
     }
 
