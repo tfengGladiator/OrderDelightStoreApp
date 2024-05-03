@@ -257,6 +257,7 @@ code {
     width: 200px; /* Adjust width as needed */
     margin: 20px 0 0 10px;
     flex-grow: 1;
+    max-width:220px;
 }
 
 .category-list {

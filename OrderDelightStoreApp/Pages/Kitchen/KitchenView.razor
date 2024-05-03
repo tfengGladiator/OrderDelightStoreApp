@@ -13,15 +13,14 @@
                     <RadzenText Text="@ResolveStatusDescription(status)" Style="color:black; font-size:larger; font-weight:bold;"></RadzenText>
                 </div>
                 <div class="scroll-arrow up-arrow" style="display: none;"><img src="/images/up-arrow.png" /></div>  <!-- Use display: none for initial state -->
-                <div class="food-list-container centered-content"
-                     @ondragover:preventDefault
-                     @ondrop="@(e => DropItem(e, status))"
-                     @ondragleave="@(e => Console.WriteLine($"Leaving {status} area"))">
+                <div class="food-list-container centered-content">
                     <ul class="food-list-kitchen-view">
                         @foreach (var foodItemSelected in GetFoodItemsSelected(status))
                         {
                             <li draggable="true"
                                 @ondragstart="@(e => DragStart(e, foodItemSelected))"
+                                @ondrop="@(e => DropItem(e, status))"
+                                @ondragleave="@(e => Console.WriteLine($"Leaving {status} area"))"
                                 class="food-item">
                                 <img src="@ResolveImagePath(foodItemSelected.FoodItem)" onerror="imageError(this)" class="food-image">
                                 <span class="food-price">@ResolveFoodItemPrice(foodItemSelected)</span>
@@ -142,11 +141,11 @@
 
     string ResolveFoodItemPrice(FoodItemSelected foodItemSelected)
     {
-        return "123";
+        return foodItemSelected.FoodItem.Price.ToString("C2");
     }
     string ResolveFoodItemName(FoodItemSelected foodItemSelected)
     {
-        return "food";
+        return foodItemSelected.FoodItem.Code +"-"+ foodItemSelected.FoodItem.Name;
     }
 
     string ResolveStatusDescription(string status)

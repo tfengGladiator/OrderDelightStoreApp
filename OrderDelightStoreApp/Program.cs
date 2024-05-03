@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using OrderDelightLibrary.Shared.Services;
 using OrderDelightStoreApp;
 using OrderDelightStoreApp.Services;
+using Syncfusion.Blazor;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+			builder.Services.AddSyncfusionBlazor();
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 

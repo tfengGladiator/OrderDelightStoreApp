@@ -1,7 +1,7 @@
 ﻿self.assetsManifest = {
   "assets": [
     {
-      "hash": "sha256-NGI2r0pVMfRcuXLWpHm\/rPxuA37rq2g9s82LR2\/odc8=",
+      "hash": "sha256-5u9srCFOPJPMc+MS9XNGmBf6duX5HfcAbvp0rVqwv50=",
       "url": "css\/app.css"
     },
     {
@@ -1153,15 +1153,15 @@
       "url": "_framework\/OrderDelightLibrary.Shared.pdb"
     },
     {
-      "hash": "sha256-HgscpTtjKfHL1qNlyibu4RYFGcwnFFzP411aqJvNnfY=",
+      "hash": "sha256-gu+RUkKXuYRhBtqIxC45WLUWqa3HpEPDq0i536HTXxw=",
       "url": "_framework\/OrderDelightStoreApp.wasm"
     },
     {
-      "hash": "sha256-19OzvCvF3CCz8bseYD\/rGQlUHrXp7b7I25JN3M0dljw=",
+      "hash": "sha256-TCSJJsv7PlD48PZq7zDqzimPZO338MBbBYhxrUdxTuo=",
       "url": "_framework\/OrderDelightStoreApp.pdb"
     },
     {
-      "hash": "sha256-ZGdmJmtKmIncXlxwwN2WUViHaqv1b7k8hduu3w\/5wcY=",
+      "hash": "sha256-9HRm22lJT1OASV6LbU4DLzj2iAohU6c88Q7TLVD2tLE=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -1361,5 +1361,5 @@
       "url": "_content\/Radzen.Blazor\/Radzen.Blazor.js"
     }
   ],
-  "version": "ugxmRKEW"
+  "version": "iHZp7Obu"
 };
