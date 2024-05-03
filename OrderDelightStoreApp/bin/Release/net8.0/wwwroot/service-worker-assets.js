@@ -1,7 +1,7 @@
 ﻿self.assetsManifest = {
   "assets": [
     {
-      "hash": "sha256-Nmaz7qA6da1q9YLzXHyC1+O5\/uDhORHrgCg89pXF3iE=",
+      "hash": "sha256-i+pArfP0RW\/\/fBbFlaaKFHA2u4iotJAjNXh0Wb6t1kw=",
       "url": "css\/app.css"
     },
     {
@@ -27,6 +27,10 @@
     {
       "hash": "sha256-oEo6d+KqX5fjxTiZk\/w9NB3Mi0+ycS5yLwCKwr4IkbA=",
       "url": "icon-512.png"
+    },
+    {
+      "hash": "sha256-YjfLE8d0lPcV+f9gk78uSUwtYnCIOU7qgrlpRltELwU=",
+      "url": "images\/down-arrow.png"
     },
     {
       "hash": "sha256-pcTtJO\/7OUWLEcUnrFmWrlZrSsJgsuqGXFBLXIOcYv0=",
@@ -109,7 +113,11 @@
       "url": "images\/QR.jpg"
     },
     {
-      "hash": "sha256-J\/YEMkSkh3GbLKZXKYSozC0r2AfOxoUZJIzOhvkf6D4=",
+      "hash": "sha256-VLMN3Xy4udwL0nfYue7BC+kcy75D+5yiLGOpppSMc\/Q=",
+      "url": "images\/up-arrow.png"
+    },
+    {
+      "hash": "sha256-em89pfhgJC+dKSV1\/Kz6MWao4MiWogVKWFWuFpmdLRY=",
       "url": "index.html"
     },
     {
@@ -1145,15 +1153,15 @@
       "url": "_framework\/OrderDelightLibrary.Shared.pdb"
     },
     {
-      "hash": "sha256-X5ZnjK7MtArCgpEop5gyFpXtBe54BmPVnDGRrck+KGg=",
+      "hash": "sha256-GF9XunkfP04ofHiTsmMGesJeCevMrpRiY2UKhIhOzH8=",
       "url": "_framework\/OrderDelightStoreApp.wasm"
     },
     {
-      "hash": "sha256-veBx6KJlXDan9i6ncPGBwTmgpQXRwi8x97iR9I3gIuA=",
+      "hash": "sha256-5t\/VGa3LPDPg\/zB9Os\/jnTenUqio3fKHo7u7KgpxDt8=",
       "url": "_framework\/OrderDelightStoreApp.pdb"
     },
     {
-      "hash": "sha256-682zN7y\/C65SbX5BqaPNcbvjLR6oKSOwRZrtX9RWczY=",
+      "hash": "sha256-O1YagBMWyNdV0yg+XEE7PQ318ud\/y7pYRUUH0Y0h8EA=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -1353,5 +1361,5 @@
       "url": "_content\/Radzen.Blazor\/Radzen.Blazor.js"
     }
   ],
-  "version": "RV6zQzJ\/"
+  "version": "hr\/X1QVT"
 };
