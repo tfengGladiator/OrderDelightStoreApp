@@ -17,7 +17,7 @@
                      @ondragover:preventDefault
                      @ondrop="@(e => DropItem(e, status))"
                      @ondragleave="@(e => Console.WriteLine($"Leaving {status} area"))">
-                    <ul class="food-list">
+                    <ul class="food-list-kitchen-view">
                         @foreach (var foodItemSelected in GetFoodItemsSelected(status))
                         {
                             <li draggable="true"
@@ -39,6 +39,16 @@
 </RadzenCard>
 
 <style>
+
+    .food-list-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        max-height: 600px;
+    }
     .centered-text {
         text-align: center;
         width: 100%;

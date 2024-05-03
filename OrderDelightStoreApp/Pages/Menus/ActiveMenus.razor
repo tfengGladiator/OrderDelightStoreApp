@@ -59,7 +59,7 @@ else
 
             <!-- Food Items -->
             <div class="food-list-container">
-                <ul class="food-list">
+                <ul class="food-list-menu-tab">
                     @foreach (var menuItem in filteredMenuFoodItems)
                     {
                         <li class="food-item" @onclick="@(async () => await ViewFoodOptions(menuItem.FoodItem))">
@@ -87,7 +87,15 @@ else
 
 <style>
 
-   
+@*     .food-list-container {
+        height: 60vh; /* Set to a fixed height or based on viewport (vh) */
+        overflow-y: scroll; /* Only vertical scrolling */
+        flex-grow: 4;
+        width: 80%;
+        padding-left: 20px;
+        padding-top: 10px;
+    }
+    *@
 
 </style>
 
