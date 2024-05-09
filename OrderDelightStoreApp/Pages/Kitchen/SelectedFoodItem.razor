@@ -1,0 +1,35 @@
+﻿@inject StoreAppService StoreAppService
+<li draggable="true" class="food-item" @ondragstart="@(() => HandleDragStart(OrderedFoodItem))">
+    <img src="@ResolveImagePath(OrderedFoodItem.FoodItem)" onerror="imageError(this)" class="food-image">
+    <span class="food-price">@ResolveFoodItemPrice(OrderedFoodItem)</span>
+    <div class="food-info">
+        <span class="food-name">@ResolveFoodItemName(OrderedFoodItem)</span>
+    </div>
+</li>
+
+@code {
+    [CascadingParameter] SelectedFoodItemContainer Container { get; set; }
+
+    [Parameter]
+    public FoodItemSelected OrderedFoodItem { get; set; }
+
+    private void HandleDragStart(FoodItemSelected selectedFoodItem)
+    {
+        Console.WriteLine("HandleDragStart");
+        Container.Payload = selectedFoodItem;
+    }
+
+    string ResolveImagePath(FoodItem foodItem)
+    {
+        return StoreAppService.GetFoodItemImageUrl(foodItem);
+    }
+
+    string ResolveFoodItemPrice(FoodItemSelected foodItemSelected)
+    {
+        return foodItemSelected.FoodItem.Price.ToString("C2");
+    }
+    string ResolveFoodItemName(FoodItemSelected ordered)
+    {
+        return ordered.FoodItem.Code +"-"+ ordered.FoodItem.Name;
+    }
+}

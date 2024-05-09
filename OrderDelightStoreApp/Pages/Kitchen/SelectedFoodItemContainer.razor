@@ -1,0 +1,25 @@
+﻿<div class="jobs-container">
+    <CascadingValue Value="this">
+        @ChildContent
+    </CascadingValue>
+</div>
+
+@code {
+    [Parameter] public List<FoodItemSelected> OrderedFoodItems { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public EventCallback<FoodItemSelected> OnStatusUpdated { get; set; }
+
+    public FoodItemSelected Payload { get; set; }
+
+    public async Task UpdateFoodItemAsync(string newStatus)
+    {
+        var itemSelected = OrderedFoodItems.FirstOrDefault(x => x.ShoppingCartItemId == Payload.ShoppingCartItemId);
+
+        if (itemSelected != null)
+        {
+            itemSelected.Status = newStatus.ToString();
+           // task.FoodItemSelected. = DateTime.Now;
+            await OnStatusUpdated.InvokeAsync(Payload);
+        }
+    }
+}

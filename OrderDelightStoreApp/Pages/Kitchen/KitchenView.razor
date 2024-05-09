@@ -1,42 +1,32 @@
-﻿@page "/kitchenView"
-@page "/orders"
-@inject NavigationManager NavManager
+﻿@page "/kitchenView0"
 @inject StoreAppService StoreAppService
-@using Microsoft.AspNetCore.Components.Web
 @inject IJSRuntime JSRuntime
-<RadzenCard Class="rz-3 card-full-height">
-    <RadzenRow Gap="0" RowGap="0" Style="border: 1px lightgray solid">
-        @foreach (var status in new string[] { "New", "WorkInProgress", "Ready", "Served" })
-        {
-            <RadzenColumn Size="3" Style="position: relative;">  <!-- Ensure position relative here -->
-                <div class="centered-text" style="padding:15px; background-color: #EBEBEB;">
-                    <RadzenText Text="@ResolveStatusDescription(status)" Style="color:black; font-size:larger; font-weight:bold;"></RadzenText>
-                </div>
-                <div class="scroll-arrow up-arrow" style="display: none;"><img src="/images/up-arrow.png" /></div>  <!-- Use display: none for initial state -->
-                <div class="food-list-container centered-content">
-                    <ul class="food-list-kitchen-view">
-                        @foreach (var foodItemSelected in GetFoodItemsSelected(status))
-                        {
-                            <li draggable="true"
-                                @ondragstart="@(e => DragStart(e, foodItemSelected))"
-                                @ondrop="@(e => DropItem(e, status))"
-                                @ondragleave="@(e => Console.WriteLine($"Leaving {status} area"))"
-                                class="food-item">
-                                <img src="@ResolveImagePath(foodItemSelected.FoodItem)" onerror="imageError(this)" class="food-image">
-                                <span class="food-price">@ResolveFoodItemPrice(foodItemSelected)</span>
-                                <div class="food-info">
-                                    <span class="food-name">@ResolveFoodItemName(foodItemSelected)</span>
-                                </div>
-                            </li>
-                        }
-                    </ul>
-                </div>
-                <div class="scroll-arrow down-arrow" style="display: none;"><img src="/images/down-arrow.png" /></div>
-            </RadzenColumn>
-        }
-    </RadzenRow>
-</RadzenCard>
+@using Syncfusion.Blazor.Kanban
 
+<RadzenCard Class="rz-3 card-full-height">
+    <SfKanban DataSource="@AllShoppingCartFoodItems" KeyField="Status" AllowDragAndDrop="true">
+        <KanbanColumns>
+            <KanbanColumn HeaderText="New" KeyField="@(new List<string>() {"New"})"></KanbanColumn>
+            <KanbanColumn HeaderText="Work In Progress" KeyField="@(new List<string>() {"WorkInProgress"})"></KanbanColumn>
+            <KanbanColumn HeaderText="Ready" KeyField="@(new List<string>() {"Ready"})"></KanbanColumn>
+            <KanbanColumn HeaderText="Served" KeyField="@(new List<string>() {"Served"})"></KanbanColumn>
+        </KanbanColumns>
+        <KanbanCardSettings>
+            <Template Context="foodItemSelected">
+                @{
+                   var fis = foodItemSelected as FoodItemSelected;
+                }
+                <div class="food-item">
+                    <img src="@ResolveImagePath(fis.FoodItem)" alt="Food Image" onerror="imageError(this)" class="food-image">
+                    <span class="food-price">@ResolveFoodItemPrice(fis)</span>
+                    <div class="food-info">
+                        <span class="food-name">@ResolveFoodItemName(fis)</span>
+                    </div>
+                </div>
+            </Template>
+        </KanbanCardSettings>
+    </SfKanban> 
+</RadzenCard>
 <style>
 
     .food-list-container {
@@ -90,8 +80,8 @@
         width: 100%;
         text-align: center;
         cursor: pointer;
-        font-size: 24px;
-        // Visible size color: #666;
+        font-size: 24px;        // Visible size 
+        color: #666;
         z-index: 1000; // Ensure it's on top
     }
 
@@ -127,6 +117,14 @@
     protected override async Task OnInitializedAsync()
     {
         AllShoppingCartFoodItems = await StoreAppService.GetFoodItemsSelectedAsync();
+        foreach(var item in AllShoppingCartFoodItems)
+        {
+           if(string.IsNullOrWhiteSpace(item.Status))
+                item.Status = "New";
+
+            Console.WriteLine($"{item.FoodItem.Name}: " + item.Status);
+        }
+        Console.WriteLine("AllShoppingCartFoodItems: " + AllShoppingCartFoodItems.Count);
     }
 
     string ResolveImagePath(FoodItem foodItem)

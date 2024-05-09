@@ -1,0 +1,41 @@
+﻿@page "/KitchenView"
+@inject StoreAppService StoreAppService
+
+<SelectedFoodItemContainer OrderedFoodItems="AllShoppingCartFoodItems" OnStatusUpdated="(FoodItemSelected e)=>HandleStatusUpdated(e)">
+    <SelectedFoodItemList ListStatus="New" AllowedStatuses="@(new [] { "New","WorkInProgress","Ready","Served"})" />
+    <SelectedFoodItemList ListStatus="WorkInProgress" AllowedStatuses="@(new [] { "New","WorkInProgress","Ready","Served"})" />
+    <SelectedFoodItemList ListStatus="Ready" AllowedStatuses="@(new [] { "New","WorkInProgress","Ready","Served"})" />
+    <SelectedFoodItemList ListStatus="Served" AllowedStatuses="@(new [] { "New","WorkInProgress","Ready","Served"})" />
+</SelectedFoodItemContainer>
+
+<hr />
+<p>Last updated job was: <strong>@lastUpdated</strong></p>
+<hr />
+
+@foreach (var selected in AllShoppingCartFoodItems)
+{
+    <p>@selected.FoodItem.Name - <strong>@selected.Status</strong></p>
+}
+
+@code {
+    string lastUpdated = "";
+    public List<FoodItemSelected> AllShoppingCartFoodItems { get; set; } = new List<FoodItemSelected>();
+    protected override async Task OnInitializedAsync()
+    {
+        AllShoppingCartFoodItems = await StoreAppService.GetFoodItemsSelectedAsync();
+        foreach(var item in AllShoppingCartFoodItems)
+        {
+            if(string.IsNullOrWhiteSpace(item.Status))
+                item.Status = "New";
+
+            Console.WriteLine($"{item.FoodItem.Name}: " + item.Status);
+        }
+        Console.WriteLine("AllShoppingCartFoodItems: " + AllShoppingCartFoodItems.Count);
+    }
+
+    void HandleStatusUpdated(FoodItemSelected updated)
+    {
+        Console.WriteLine("HandleStatusUpdated:"+updated.Status);
+        lastUpdated = updated.FoodItem.Name;
+    }
+}

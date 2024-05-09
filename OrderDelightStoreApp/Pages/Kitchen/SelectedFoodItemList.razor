@@ -1,0 +1,79 @@
+﻿<div class="job-status">
+    <h3>@ListStatus (@SelectedFoodItems.Count())</h3>
+
+    <ul class="dropzone @dropClass"
+        ondragover="event.preventDefault();"
+        ondragstart="event.dataTransfer.setData('', event.target.id);"
+        @ondrop="HandleDrop"
+        @ondragenter="HandleDragEnter"
+        @ondragleave="HandleDragLeave">
+
+        @foreach (var foodItem in SelectedFoodItems)
+        {
+            <SelectedFoodItem OrderedFoodItem="@foodItem" />
+        }
+
+    </ul>
+</div>
+<style>
+.dropzone {
+        min-height: 100px;
+        border: 2px dashed #ccc;
+        padding: 10px;
+        margin: 10px 0;
+    }
+
+    .can-drop {
+        border-color: green;
+    }
+
+    .no-drop {
+        border-color: red;
+    }
+    </style>
+@code {
+
+    [CascadingParameter] SelectedFoodItemContainer Container { get; set; }
+    [Parameter] public string ListStatus { get; set; }
+    [Parameter] public string[] AllowedStatuses { get; set; }
+
+    List<FoodItemSelected> SelectedFoodItems = new List<FoodItemSelected>();
+    string dropClass = "";
+
+    protected override void OnParametersSet()
+    {
+        SelectedFoodItems.Clear();
+        SelectedFoodItems.AddRange(Container.OrderedFoodItems.Where(x => x.Status == ListStatus));
+    }
+
+    private void HandleDragEnter()
+    {
+        Console.WriteLine("HandleDragEnter");
+        if (ListStatus == Container.Payload.Status) return;
+
+        if (!AllowedStatuses.Contains(Container.Payload.Status))
+        {
+            dropClass = "no-drop";
+        }
+        else
+        {
+            dropClass = "can-drop";
+        }
+    }
+
+    private void HandleDragLeave()
+    {
+        Console.WriteLine("HandleDragLeave");
+        dropClass = "";
+    }
+
+    private async Task HandleDrop()
+    {
+        Console.WriteLine("HandleDrop");
+        dropClass = "";
+
+        if (!AllowedStatuses.Contains(Container.Payload.Status)) return;
+
+        await Container.UpdateFoodItemAsync(ListStatus);
+    }
+}
