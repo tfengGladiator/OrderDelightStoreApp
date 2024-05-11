@@ -372,3 +372,92 @@ code {
     height: 65px; /* Fixed height to ensure that single and multiline text is centered */
     font-size: 14px;
 }
+<!-- -->
+.dropzone {
+    min-height: 100px;
+    border: 0px dashed #ccc;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.can-drop {
+    /*  border-color: green; */
+    background-color: #f7cc97 !important;
+}
+
+.no-drop {
+    border-color: red;
+}
+
+
+/*  .food-list-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        max-height: 600px;
+    } */
+
+.centered-text {
+    text-align: center;
+    width: 100%;
+    padding-bottom: 40px;
+    // Add padding to push the up arrow down
+}
+
+
+.card-full-height {
+    height: 100%; /* Ensures the card fills the height it's allowed */
+    min-height: 100vh; /* Ensures the card fills the viewport height */
+    display: flex;
+    flex-direction: column;
+}
+
+
+.centered-content {
+    display: flex;
+    justify-content: center; /* Horizontally center the content */
+    align-items: top; /* Incorrect if meant to center vertically; use 'flex-start' for aligning to the top */
+    text-align: center;
+    width: 100%; /* Ensures full width */
+    /*  height: 100%; Full height for vertical centering */
+}
+
+
+.food-list-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Aligns content to the top */
+    align-items: center; /* Keeps items centered horizontally */
+    width: 100%; /* Ensure it takes full width */
+    height: 95%; /* Stretch to fill container height */
+    max-height: 600px; /* Maximum height before scrolling starts */
+    overflow-y: auto; /* Allows scrolling */
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer 10+ */
+    /* For Chrome, Safari, and Opera */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.scroll-arrow {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    font-size: 24px;
+    z-index: 1000;
+}
+
+.up-arrow {
+   /* top: -30px;*/
+    /* Adjust as necessary based on your layout */
+}
+
+.down-arrow {
+   /* bottom: -30px;*/
+    /* Adjust as necessary */
+}

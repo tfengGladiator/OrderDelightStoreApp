@@ -35,6 +35,36 @@
         //    iframe.contentWindow.print();
         //    document.body.removeChild(iframe);
         //}
+        function setupScrollArrows() {
+            document.querySelectorAll('.food-list-container').forEach(container => {
+                // Find arrows directly as siblings
+                const upArrow = container.previousElementSibling;  // Assuming .up-arrow is directly before .food-list-container
+                const downArrow = container.nextElementSibling;    // Assuming .down-arrow is directly after .food-list-container
+
+                const checkArrows = () => {
+                    if (!upArrow) {
+                        console.log('Up arrow not found'); // Debug output
+                        return;
+                    }
+                    if (!downArrow) {
+                        console.log('Down arrow not found'); // Debug output
+                        return;
+                    }
+                    if (!upArrow || !downArrow) return; // Exit if arrows are not found
+                    const isTopVisible = container.scrollTop > 0;
+                    const isBottomVisible = container.scrollHeight > container.scrollTop + container.clientHeight;
+                    console.log("Top Visible:", isTopVisible, "Bottom Visible:", isBottomVisible); // Debug output
+                    upArrow.style.display = isTopVisible ? 'block' : 'none';
+                    downArrow.style.display = isBottomVisible ? 'block' : 'none';
+                };
+
+                container.addEventListener('scroll', () => {
+                    console.log('Scroll event triggered'); // Debug output
+                    checkArrows();
+                });
+
+            });
+        }
 
         function getCookie(name) {
             let cookieValue = null;
@@ -69,7 +99,7 @@
 
     </script>
     <link rel="stylesheet" href=" _content/Syncfusion.Blazor/styles/bootstrap4.css" />
-    <script src="_content/Syncfusion.Blazor.Core/scripts/syncfusion-blazor.min.js" type="text/javascript"></script>
+    <!--<script src="_content/Syncfusion.Blazor.Core/scripts/syncfusion-blazor.min.js" type="text/javascript"></script>-->
 </head>
 
 <body>
@@ -119,26 +149,11 @@
             }
         }
 
-        window.onload = function () {
-            setupScrollArrows();
-        };
+        //window.onload = function () {
+        //    setupScrollArrows();
+        //};
 
-       function setupScrollArrows() {
-    document.querySelectorAll('.food-list-container').forEach(container => {
-        const upArrow = container.previousElementSibling;
-        const downArrow = container.nextElementSibling;
-        const checkArrows = () => {
-            const isTopVisible = container.scrollTop > 0;
-            const isBottomVisible = container.scrollHeight > container.scrollTop + container.clientHeight;
-            upArrow.style.display = isTopVisible ? 'block' : 'none';
-            downArrow.style.display = isBottomVisible ? 'block' : 'none';
-        };
-        container.addEventListener('scroll', checkArrows);
-        checkArrows();  // Check on initial load
-    });
-}
-
-
+      
     </script>
 
 </body>

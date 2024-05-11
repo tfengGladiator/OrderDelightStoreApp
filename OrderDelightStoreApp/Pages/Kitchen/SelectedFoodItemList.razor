@@ -1,42 +1,45 @@
-﻿<div class="job-status">
-    <h3>@ListStatus (@SelectedFoodItems.Count())</h3>
-
-    <ul class="dropzone @dropClass"
-        ondragover="event.preventDefault();"
-        ondragstart="event.dataTransfer.setData('', event.target.id);"
-        @ondrop="HandleDrop"
-        @ondragenter="HandleDragEnter"
-        @ondragleave="HandleDragLeave">
-
-        @foreach (var foodItem in SelectedFoodItems)
-        {
-            <SelectedFoodItem OrderedFoodItem="@foodItem" />
-        }
-
-    </ul>
-</div>
+﻿  @inject IJSRuntime JSRuntime
+  <div style="position: relative;width:25%;">
+      @*   <h3>@ListStatus (@SelectedFoodItems.Count())</h3> *@
+      <div class="centered-text" style="padding:15px; background-color: #EBEBEB;">
+          <RadzenText Text="@(ListStatus+" ("+SelectedFoodItems.Count()+")")" Style="color:black; font-size:larger; font-weight:bold;"></RadzenText>
+      </div>
+      <div class="scroll-arrow up-arrow" style="display: none;"><img src="/images/up-arrow.png" /></div>  <!-- Use display: none for initial state -->
+      <div class="food-list-container centered-content">
+          <ul style="min-height:600px;min-width:200px;"
+              class="dropzone @dropClass food-list-kitchen-view"
+              ondragover="event.preventDefault();"
+              ondragstart="event.dataTransfer.setData('', event.target.id);"
+              @ondrop="HandleDrop"
+              @ondragenter="HandleDragEnter"
+              @ondragleave="HandleDragLeave">
+              <RadzeacnStack Orientation="Orientation.Vertical">
+                @foreach (var foodItem in SelectedFoodItems)
+                {
+                    <SelectedFoodItem OrderedFoodItem="@foodItem" />
+                }
+              </RadzeacnStack>
+          </ul>
+      </div>
+      <div class="scroll-arrow down-arrow" style="display: none;"><img src="/images/down-arrow.png" /></div>
+  </div>
 <style>
-.dropzone {
-        min-height: 100px;
-        border: 2px dashed #ccc;
-        padding: 10px;
-        margin: 10px 0;
-    }
 
-    .can-drop {
-        border-color: green;
-    }
-
-    .no-drop {
-        border-color: red;
-    }
-    </style>
+</style>
 @code {
 
     [CascadingParameter] SelectedFoodItemContainer Container { get; set; }
     [Parameter] public string ListStatus { get; set; }
     [Parameter] public string[] AllowedStatuses { get; set; }
-
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("Delaying JS setup...");
+            await Task.Delay(500); // Wait for half a second
+            await JSRuntime.InvokeVoidAsync("setupScrollArrows");
+        }
+    }
     List<FoodItemSelected> SelectedFoodItems = new List<FoodItemSelected>();
     string dropClass = "";
 
@@ -76,4 +79,7 @@
 
         await Container.UpdateFoodItemAsync(ListStatus);
     }
+
+ 
+ 
 }

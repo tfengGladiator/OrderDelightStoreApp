@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "OrderDelightStoreApp",
   "resources": {
-    "hash": "sha256-wP+i31m8vtpmEgMfdGlMyHjDBzu8BHwAOm2IzAjECc0=",
+    "hash": "sha256-DUqm08nAUnBHDw6+yNB4nTrSUL2W9wV8vXILxPMDaS4=",
     "jsModuleNative": {
       "dotnet.native.8.0.2.o8xsdjjzut.js": "sha256-gPMK16QWoJSTxorlZJqcVtbBRTniIQWlLsJN2O4cJHg="
     },
@@ -78,6 +78,10 @@
       "SharpCompress.wasm": "sha256-5T7C9zsTB8Pr6/ydLJ4ILwSeTbvSzCeyxVoEXO0Rl5Q=",
       "Snappier.wasm": "sha256-Gm94GtJQLL4cxpQaCqIJxc0dCxpC/lvYPK/tNy0pRVk=",
       "StackExchange.Redis.wasm": "sha256-QleYj7vb94OinNN0IyqoZ9XDgqviwOvCaDcUlc19Pw8=",
+      "Syncfusion.Blazor.wasm": "sha256-wuzJXNpA3dgjJdsWn+am40lR5nsmhLWoup1zz5PgODY=",
+      "Syncfusion.ExcelExport.Net.wasm": "sha256-CEzENOCEzhY6e6xIOILgQcY+wQ9VHpAQJvUGXTfx0oE=",
+      "Syncfusion.Licensing.wasm": "sha256-oMIpQu3iHOI1lym3tKiUXnX77fkLDeKcph3tpcCXung=",
+      "Syncfusion.PdfExport.Net.wasm": "sha256-vlvUCHDzrLy/Z5ljDkLT7mriKqAB0DfsJPaDMpbeLY8=",
       "System.ClientModel.wasm": "sha256-hB3YvRqtJh9HC69ryOu2jplvTqYa8opx1wPk+N/txKs=",
       "System.Configuration.ConfigurationManager.wasm": "sha256-Ey9QseSg8lIw8pRXkXaGaDOuLW5qJ/o7jUjkeomqUmk=",
       "System.Drawing.Common.wasm": "sha256-K4kz7R8w/w1hXO31g3GdLNqPgu4KDENnDuMEnMfDDnc=",
@@ -258,14 +262,14 @@
       "mscorlib.wasm": "sha256-OH3kXneWqQMz6CUSo6POZqIeMqn9+5RR+IgHn5TnIwA=",
       "netstandard.wasm": "sha256-ZOswxXEbR2TmqjpbaBEdgr85Bv1NC4GwOwoJ+oxXM3M=",
       "System.Private.CoreLib.wasm": "sha256-I2w0iHf5nvSQyF1YE1VbgdTzmmz6a4OE6J7vo5wFa/4=",
-      "OrderDelightLibrary.wasm": "sha256-94toTuupPUueN4pzzYCDY6YHs1RTmIE/ceyQJo/JhLU=",
-      "OrderDelightLibrary.Shared.wasm": "sha256-/13YAdmQ8JJOzWQHzlqMTUBqn04qM+X2bY8/po3LqJg=",
-      "OrderDelightStoreApp.wasm": "sha256-gu+RUkKXuYRhBtqIxC45WLUWqa3HpEPDq0i536HTXxw="
+      "OrderDelightLibrary.wasm": "sha256-gg0qUjxd8Q93QfMUIuO+cESm4SCwD1UDdDLElD90V8Q=",
+      "OrderDelightLibrary.Shared.wasm": "sha256-Sc2LREGPq8IrgKQKXv5LEsWh/gyu9fvHE71MYICBiHE=",
+      "OrderDelightStoreApp.wasm": "sha256-MQPsiiuKjoDf4HlKBRXBdUqaTtPY/l1QymLKTf1bkEA="
     },
     "pdb": {
-      "OrderDelightLibrary.pdb": "sha256-REpOIsBmGnvOQNkJPOXhOoqBqIh6JMXbtRwMYZ+oagQ=",
-      "OrderDelightLibrary.Shared.pdb": "sha256-FThbOYDGJPZUihsHKt+hNG0CLKQGZ9+XyTh6s/fRuyY=",
-      "OrderDelightStoreApp.pdb": "sha256-TCSJJsv7PlD48PZq7zDqzimPZO338MBbBYhxrUdxTuo="
+      "OrderDelightLibrary.pdb": "sha256-jOZpO/Ei1hRpBqhNNH7iiiBX/3RCy7v39Gwi0pL7o30=",
+      "OrderDelightLibrary.Shared.pdb": "sha256-qLmhqto04Xx29Hj2SZ05JQYzr+Yga8pkJftx7fo3GoQ=",
+      "OrderDelightStoreApp.pdb": "sha256-YM24VIKJb5pdekTSS7abqzEWnN7PnKYPhqFDVNxRU98="
     }
   },
   "cacheBootResources": true,

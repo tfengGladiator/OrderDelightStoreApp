@@ -1,8 +1,9 @@
-﻿<div class="jobs-container">
+﻿@inject IJSRuntime JSRuntime
+<RadzenRow Gap="0" RowGap="0" Style="border: 1px lightgray solid">
     <CascadingValue Value="this">
         @ChildContent
     </CascadingValue>
-</div>
+</RadzenRow>
 
 @code {
     [Parameter] public List<FoodItemSelected> OrderedFoodItems { get; set; }
